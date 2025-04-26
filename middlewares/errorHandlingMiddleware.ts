@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 import { NextFunction, Request, Response} from 'express'
 import { StatusCodes } from 'http-status-codes'
-import ApiError from '../utils/AppError'
+import ApiError from '../Utils/AppError'
 // import { env } from '~/config/environment'
 
 // Middleware xử lý lỗi tập trung trong ứng dụng Back-end NodeJS (ExpressJS)

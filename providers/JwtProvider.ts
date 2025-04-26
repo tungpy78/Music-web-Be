@@ -17,7 +17,8 @@ const verifyToken = async (token: string, secretSignature: Secret) => {
   try {
     return JWT.verify(token, secretSignature);
   } catch (error) {
-    throw new Error('Error verifying token');
+    console.error('Error verifying token:', error);
+    throw error;
   }
 };
 

@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
         unique: true,
         match: [/^0\d{9,10}$/, 'Số điện thoại không hợp lệ']
     },
+    fullname:{
+        type:String,
+        required: true,
+    },
     role: {
         type: String,
         enum: ["admin", "user"],
