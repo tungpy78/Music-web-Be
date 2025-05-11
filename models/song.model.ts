@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
-import "../models/Artist.model";
+import "./Artist.model";
 
-const SongSchema = new mongoose.Schema({
+const SongSchema = new mongoose.Schema(
+  {
     title: { type: String, required: true },
     artist: { type: mongoose.Schema.Types.ObjectId, ref: 'Artist', required: true },
     genre: { type: mongoose.Schema.Types.ObjectId, ref: 'Topic', required: true },
@@ -13,9 +14,13 @@ const SongSchema = new mongoose.Schema({
     deleted: { type: Boolean, default: false },
     slug: { type: String, required: true },
     lyrics: String,
-
-  },{timestamps: true});
+    number_listen: {type: Number, default: 0},
+    alnum_id: {type: mongoose.Schema.Types.ObjectId}
+  },
+  {
+    timestamps: true
+  }
+);
   
-const Song = mongoose.model('Song', SongSchema,"songs");
+const Song = mongoose.model('Song', SongSchema,"SONG");
 export default Song;
-  

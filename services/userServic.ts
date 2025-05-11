@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes"
-import User from "../models/user.model"
+import User from "../models/User.model"
 import ApiError from "../Utils/AppError"
 import { JwtProvider } from "../providers/JwtProvider"
 import { JwtPayload } from "jsonwebtoken";

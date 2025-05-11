@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const topicSchema = new mongoose.Schema(
     {
-        title: String,
+        title: {type: String, required: true, unique: true},
         avatar: String,
         description: String,
         status: String,
@@ -12,13 +12,12 @@ const topicSchema = new mongoose.Schema(
             default: false,
         },
         deletedAt: Date,
-
     },
     {
         timestamps: true,
     }
 );
 
-const Topic = mongoose.model("Topic", topicSchema, "topics");
+const Topic = mongoose.model("Topic", topicSchema, "TOPIC");
 
 export default Topic;

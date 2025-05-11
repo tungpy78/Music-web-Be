@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { SongController } from "../../controllers/songController";
-import Song from "../../models/song.model";
+import Song from "../../models/Song.model";
 
 
 
