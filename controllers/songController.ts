@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { SongService } from "../services/songService";
 import { StatusCodes } from "http-status-codes";
+import { SongRequest } from "../Request/SongRequest"
 
 const getSongs = async (req:Request, res:Response, next:NextFunction) => {
     try {
@@ -63,10 +64,26 @@ const addHistorySong = async (req:Request, res: Response, next:NextFunction) => 
     }
 }
 
+const addNewSong = async (req:Request, res: Response, next:NextFunction) =>{
+    try{
+        const songRequest = req.body as SongRequest;
+        if (!songRequest.title || !songRequest.artist || !songRequest.genre || !songRequest.avatar || !songRequest.audio) {
+            return res.status(400).json({ message: "Thiếu trường bắt buộc: title, artist, genre, avatar, audio" });
+        }
+        const result = await SongService.addNewSong(songRequest)
+         res.status(StatusCodes.OK).json(result)
+    }catch(e){
+        next(e)
+    }
+}
+
+
+
 export const SongController = {
     getSongs,
     toggleFavorite,
     addSongIntoPlayList,
     createPlayList,
-    addHistorySong
+    addHistorySong,
+    addNewSong
 }

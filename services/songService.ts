@@ -6,6 +6,8 @@ import Favorite from "../models/favorite.model"
 import { JwtProvider } from "../providers/JwtProvider"
 import Playlist from "../models/Playlist.model"
 import History from "../models/History.model"
+import { SongRequest } from "../Request/SongRequest"
+import { toSlug } from "../Utils/ToSlug"
 
 const getSongService = async (songId: string, userId: string) => {
     console.log("userId",userId)
@@ -112,11 +114,30 @@ const addHistoryService = async(songId:string, userId:string)=> {
     }
 }
 
+const addNewSong = async(songRequest: SongRequest)=>{
+    try{
+        const song = new Song();
+        Object.assign(song, {
+            ...songRequest,
+            artist: new mongoose.Types.ObjectId(songRequest.artist),
+            genre: new mongoose.Types.ObjectId(songRequest.genre),
+        });
+        song.slug = toSlug(songRequest.title)
+        const saveSong = await song.save();
+        return saveSong;
+    }catch(e){
+      throw new Error("Lỗi: "+ e);
+    }
+
+}
+
+
 
 export const SongService = {
     getSongService,
     toggleFavoriteService,
     addSongIntoPlayListService,
     createPlayListService,
-    addHistoryService
+    addHistoryService,
+    addNewSong
 }

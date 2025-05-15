@@ -5,6 +5,7 @@ import clientRoutes from './routes/client';
 import cors from 'cors';
 import { error } from 'console';
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware';
+import adminRoutes from './routes/admin';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // ClientRouter
 clientRoutes(app);
+adminRoutes(app);
 
 // Middleware xử lý lỗi tập trung trong ứng dụng Back-end NodeJS (ExpressJS)
 app.use(errorHandlingMiddleware);
