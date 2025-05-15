@@ -68,7 +68,8 @@ const addNewSong = async (req:Request, res: Response, next:NextFunction) =>{
     try{
         const songRequest = req.body as SongRequest;
         if (!songRequest.title || !songRequest.artist || !songRequest.genre || !songRequest.avatar || !songRequest.audio) {
-            return res.status(400).json({ message: "Thiếu trường bắt buộc: title, artist, genre, avatar, audio" });
+            res.status(400).json({ message: "Thiếu trường bắt buộc: title, artist, genre, avatar, audio" });
+            return; 
         }
         const result = await SongService.addNewSong(songRequest)
          res.status(StatusCodes.OK).json(result)

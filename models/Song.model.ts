@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import "../models/Artist.model";
+import "./Artist.model";
 
 const SongSchema = new mongoose.Schema({
     title: { type: String, required: true },
@@ -13,7 +13,8 @@ const SongSchema = new mongoose.Schema({
     deleted: { type: Boolean, default: false },
     slug: { type: String, required: true },
     lyrics: String,
-
+    number_listen: {type: Number, default: 0},
+    album_id: {type: mongoose.Schema.Types.ObjectId}
   },{timestamps: true});
   
 const Song = mongoose.model('Song', SongSchema,"songs");
