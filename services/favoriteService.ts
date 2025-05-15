@@ -1,4 +1,4 @@
-import Favorite from "../models/favorite.model"
+import Favorite from "../models/Favorite.model"
 
 const getFavoriteService = async (userId:string) => {
     const favorite = await Favorite.find(

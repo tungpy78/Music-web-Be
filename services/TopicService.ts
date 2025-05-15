@@ -1,7 +1,7 @@
-import Topic from "../models/topic.model";
+import Topic from "../models/Topic.model";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../Utils/AppError";
-import Song from "../models/song.model";
+import Song from "../models/Song.model";
 import mongoose from "mongoose";
 import Artist from "../models/Artist.model";
 
