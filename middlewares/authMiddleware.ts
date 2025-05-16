@@ -47,10 +47,29 @@ const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
 
       const userData = req.jwtDecoded;
       
-      if (userData?.role === "admin") {
+      if (userData?.userInfo?.role=== "Admin") {
         next();
       } else {
-        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an admin.",});
+        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an admin." +  JSON.stringify(userData),});
+        return;
+      }
+    });
+  } catch (error) {
+    res.status(StatusCodes.UNAUTHORIZED).json({message: "Unauthorized: Please Login.",});
+    return;
+  }    
+}
+
+const isManager = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await isAuthorized(req, res, async () => {
+
+      const userData = req.jwtDecoded;
+      
+      if (userData?.role === "Admin"||userData?.role === "Manager") {
+        next();
+      } else {
+        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an Manager.",});
         return;
       }
     });
@@ -58,11 +77,11 @@ const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.UNAUTHORIZED).json({message: "Unauthorized: Please Login.",});
     return;
   }
-      
 }
 
 export const AuthMiddleware = {
     isAuthorized,
-    isAdmin
+    isAdmin,
+    isManager
 }
   

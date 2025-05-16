@@ -6,4 +6,4 @@ const RoleSchema = new mongoose.Schema({
   timestamps: true // Tự tạo createdAt, updatedAt
 });
 
-export default mongoose.model("Role", RoleSchema, "ROLE");
+export default mongoose.model("Role", RoleSchema, "Role");

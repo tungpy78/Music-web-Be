@@ -17,6 +17,6 @@ const SongSchema = new mongoose.Schema({
     album_id: {type: mongoose.Schema.Types.ObjectId}
   },{timestamps: true});
   
-const Song = mongoose.model('Song', SongSchema,"songs");
+const Song = mongoose.model('Song', SongSchema,"Songs");
 export default Song;
   

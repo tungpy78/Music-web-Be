@@ -7,12 +7,6 @@ const userSchema = new mongoose.Schema({
         unique: true,
         match: [/^\S+@\S+\.\S+$/, 'Email không hợp lệ']
     },
-    phone: {
-        type: String,
-        required: true,
-        unique: true,
-        match: [/^0\d{9,10}$/, 'Số điện thoại không hợp lệ']
-    },
     fullname:{
         type:String,
         required: true,
@@ -27,8 +21,13 @@ const userSchema = new mongoose.Schema({
         default: false,
     },
     deletedAt: Date,
+    account_id: {
+        type:mongoose.Schema.Types.ObjectId,
+        unique: true,
+        required: true,
+    }
 }, {
     timestamps: true,
 });
-const User = mongoose.model("User", userSchema, "user");
+const User = mongoose.model("User", userSchema, "User");
 export default User;

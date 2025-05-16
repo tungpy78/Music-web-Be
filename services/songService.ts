@@ -126,7 +126,7 @@ const addNewSong = async(songRequest: SongRequest)=>{
         const saveSong = await song.save();
         return saveSong;
     }catch(e){
-      throw new Error("Lỗi: "+ e);
+      throw new Error("Lỗi khi thêm nhạc: "+ e);
     }
 
 }

@@ -18,15 +18,18 @@ const loginService = async (phone: string, password: string) => {
     }
 
     // 2. So khớp mật khẩu
+    
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-        throw new ApiError(StatusCodes.UNAUTHORIZED, "Sai mật khẩu");
+
+        throw new ApiError(StatusCodes.UNAUTHORIZED, "Sai mật khẩu "+ user.password +"  "+ password);
     }
 
     const roleDoc = user.role_id as any;     // sau populate, role_id là object
     const payload = {
         userId:   user._id.toHexString(),
         username: user.username,
+        phone: user.phone,
         role:     roleDoc?.role_name || "user",
     };
     

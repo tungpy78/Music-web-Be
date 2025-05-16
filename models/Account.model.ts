@@ -1,10 +1,15 @@
 import mongoose from "mongoose";
-import { ref } from "process";
 
 const AccountSchema = new mongoose.Schema(
     {
-        username: {type: String, required: true, unique: true},
+        username: {type: String, required: true},
         password: {type: String, required: true},
+        phone: {
+            type: String,
+            required: true,
+            unique: true,
+            match: [/^0\d{9,10}$/, 'Số điện thoại không hợp lệ']
+        },
         role_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true},
         deleted: {type: Boolean,default: false}
     },
@@ -13,5 +18,5 @@ const AccountSchema = new mongoose.Schema(
     }
 );
 
-const Account = mongoose.model('Account', AccountSchema, "ACCOUNT");
+const Account = mongoose.model('Account', AccountSchema, "Account");
 export default Account
