@@ -35,8 +35,43 @@ const getRole = async(req: Request, res: Response, next: NextFunction) => {
         next(e);
     }
 }
+
+const setDelete = async(req: Request, res: Response, next: NextFunction) => {
+    try{
+        const {account_id} = req.params;
+        const result = await AuthService.setDelete(account_id);
+        res.status(StatusCodes.OK).json(result);
+    }catch(e){
+        next(e);
+    }
+}
+
+const setpassword = async (req: Request, res: Response, next: NextFunction) =>{
+    try{
+        const userData = req.jwtDecoded;
+        const account_id = userData?.userInfo?.userId;
+        const {pass,newpass} = req.body
+        const result = await AuthService.setpassword(account_id,pass,newpass);
+        res.status(StatusCodes.OK).json(result);
+    }catch(e){
+        next(e);
+    }
+}
+
+const setPassDefault = async(req: Request, res: Response, next: NextFunction) => {
+    try{
+        const {account_id} = req.params;
+        const result = await AuthService.setPassDefault(account_id);
+        res.status(StatusCodes.OK).json(result);
+    }catch(e){
+        next(e);
+    }
+}
 export const AuthController = {
     createAccount,
     setRole,
-    getRole
+    getRole,
+    setDelete,
+    setpassword,
+    setPassDefault
 }

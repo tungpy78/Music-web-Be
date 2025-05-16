@@ -33,7 +33,7 @@ const  createAccount = async(authRequest : AuthRequest) => {
 const setRole = async(account_id: string, role: string) => {
     try{
         const account = await Account.findById(account_id);
-         if (!account) {
+        if (!account) {
             throw new Error("Không tìm thấy account với ID đã cho.");
         }
         account.role_id = new mongoose.Types.ObjectId(role);
@@ -55,8 +55,57 @@ const getRole = async() => {
         throw error;
     }
 }
+
+const setDelete = async(account_id : string ) => {
+    try{
+        const account = await Account.findById(account_id);
+        if (!account) {
+            throw new Error("Không tìm thấy account với ID đã cho.");
+        }
+        account.deleted = !account.deleted;
+        await account?.save()
+        return "Cập nhập thành công"
+    }catch(e){
+        throw new Error("Lỗi khi xét quyền: "+e);
+    }
+}
+
+const setpassword = async(account_id: string, pass: string, newpass: string) => {
+    try{
+        const account = await Account.findById(account_id);  
+        if (!account) {
+            throw new Error("Không tìm thấy account với ID đã cho.");
+        }
+        const isValid = await bcrypt.compare(pass, account.password);
+        if (!isValid) {
+            throw new Error("Sai mật khẩu không khớp ");
+        }
+        account.password = await bcrypt.hash(newpass, 10);
+        await account.save()
+        return "Cập nhập thành công" 
+    }catch(e){
+        throw new Error("Lỗi khi thay đổi mk: "+e);
+    }
+}
+
+const setPassDefault = async ( account_id: string) => {
+    try{
+        const account = await Account.findById(account_id);
+        if (!account) {
+            throw new Error("Không tìm thấy account với ID đã cho.");
+        }
+        account.password = await bcrypt.hash("123456", 10);
+        await account.save();
+        return "Cập nhập thành công"
+    }catch(e){
+        throw new Error("Lỗi khi set pass default"+ e);
+    }
+}
 export const AuthService ={
     createAccount,
     setRole,
-    getRole
+    getRole,
+    setDelete,
+    setpassword,
+    setPassDefault
 }

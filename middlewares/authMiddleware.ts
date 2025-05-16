@@ -46,7 +46,6 @@ const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
     await isAuthorized(req, res, async () => {
 
       const userData = req.jwtDecoded;
-      
       if (userData?.userInfo?.role=== "Admin") {
         next();
       } else {
@@ -66,10 +65,10 @@ const isManager = async (req: Request, res: Response, next: NextFunction) => {
 
       const userData = req.jwtDecoded;
       
-      if (userData?.role === "Admin"||userData?.role === "Manager") {
+      if (userData?.userInfo?.role === "Admin"||userData?.userInfo?.role === "Manager") {
         next();
       } else {
-        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an Manager.",});
+        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an Manager." + JSON.stringify(userData),});
         return;
       }
     });

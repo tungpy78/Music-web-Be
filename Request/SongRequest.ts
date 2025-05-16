@@ -1,9 +1,9 @@
 export interface  SongRequest {
     title: string,
-    avatar: string, 
+    fileavatar: Buffer, 
     description: string,
     lyrics: string,
-    audio: string,
+    fileaudio: Buffer,
     artist: string,
     genre: string 
 }

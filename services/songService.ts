@@ -8,6 +8,9 @@ import Playlist from "../models/Playlist.model"
 import History from "../models/History.model"
 import { SongRequest } from "../Request/SongRequest"
 import { toSlug } from "../Utils/ToSlug"
+import Cloudinary from "../Utils/Cloudinary"
+import Artist from "../models/Artist.model"
+import Topic from "../models/Topic.model"
 
 const getSongService = async (songId: string, userId: string) => {
     console.log("userId",userId)
@@ -116,22 +119,108 @@ const addHistoryService = async(songId:string, userId:string)=> {
 
 const addNewSong = async(songRequest: SongRequest)=>{
     try{
+       const audioUrl = await Cloudinary.uploadToCloudinary(songRequest.fileaudio, {
+        resource_type: 'video',
+        folder: 'songs/audio',
+        });
+
+        const avatarUrl = await Cloudinary.uploadToCloudinary(songRequest.fileavatar, {
+        resource_type: 'image',
+        folder: 'songs/avatar',
+        });
+        const artist = await Artist.findById(songRequest.artist);
+        if(!artist){
+            throw new Error("Tác giả không tồn tại")
+        }
+        const genre = await Topic.findById(songRequest.genre);
+        if(!genre){
+            throw new Error("Không có thể loại tương ứng")
+        }
         const song = new Song();
         Object.assign(song, {
             ...songRequest,
             artist: new mongoose.Types.ObjectId(songRequest.artist),
             genre: new mongoose.Types.ObjectId(songRequest.genre),
+            audio: audioUrl,
+            avatar: avatarUrl
         });
         song.slug = toSlug(songRequest.title)
         const saveSong = await song.save();
-        return saveSong;
+        return "Thêm thành công ";
     }catch(e){
       throw new Error("Lỗi khi thêm nhạc: "+ e);
     }
 
 }
 
+const updateSong = async (songRequest: SongRequest,song_id: string) => {
+    try{
+        const song = await Song.findById(song_id)
+        if(!song){
+            throw new Error("Không tìm thấy bài hát tương ứng: ");
+        }
+        if(songRequest.fileavatar!= null ){
+            const avatarUrl = await Cloudinary.uploadToCloudinary(songRequest.fileavatar, {
+                resource_type: 'image',
+                folder: 'songs/avatar',        
+            });
+            song.avatar = avatarUrl;
+        }
+        if(songRequest.fileaudio != null){
+            const audioUrl = await Cloudinary.uploadToCloudinary(songRequest.fileaudio, {
+            resource_type: 'video',
+            folder: 'songs/audio',
+            });
+            song.audio = audioUrl;
+        }
+        const artist = await Artist.findById(songRequest.artist);
+        if(!artist){
+            throw new Error("Tác giả không tồn tại")
+        }
+        const genre = await Topic.findById(songRequest.genre);
+        if(!genre){
+            throw new Error("Không có thể loại tương ứng")
+        }
+        const { fileavatar, fileaudio, ...rest } = songRequest;
+        Object.assign(song, {
+            ...rest,
+            artist: new mongoose.Types.ObjectId(songRequest.artist),
+            genre: new mongoose.Types.ObjectId(songRequest.genre)
+        });
+        await song.save();
+        return "update thành công"
+    }catch(e){
+        throw new Error("Lỗi khi thay đổi thông tin: "+e);
+    }
+}
 
+const deletedsong = async(song_id: string) => {
+    try{
+        const song = await Song.findById(song_id);
+        if(!song){
+            throw new Error("Không tìm thấy bài hát tương ứng: ");
+        }
+        song.deleted = true;
+        await song.save();
+        return "Xóa thành công"
+    }catch(e){
+        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+    }
+}
+
+const restoresong = async(song_id: string) => {
+    try{
+        const song = await Song.findById(song_id);
+        if(!song){
+            throw new Error("Không tìm thấy bài hát tương ứng: ");
+        }
+        song.deleted = false;
+        await song.save();
+        return "Khôi phục thành công"
+    }catch(e){
+        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+    }
+}
 
 export const SongService = {
     getSongService,
@@ -139,5 +228,8 @@ export const SongService = {
     addSongIntoPlayListService,
     createPlayListService,
     addHistoryService,
-    addNewSong
+    addNewSong,
+    updateSong,
+    deletedsong,
+    restoresong
 }

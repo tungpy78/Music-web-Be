@@ -16,13 +16,10 @@ const loginService = async (phone: string, password: string) => {
     if (!user) {
         throw new ApiError(StatusCodes.NOT_FOUND, "User không tồn tại");
     }
-
-    // 2. So khớp mật khẩu
     
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-
-        throw new ApiError(StatusCodes.UNAUTHORIZED, "Sai mật khẩu "+ user.password +"  "+ password);
+        throw new ApiError(StatusCodes.UNAUTHORIZED, "Sai mật khẩu ");
     }
 
     const roleDoc = user.role_id as any;     // sau populate, role_id là object
