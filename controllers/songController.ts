@@ -66,8 +66,9 @@ const addHistorySong = async (req:Request, res: Response, next:NextFunction) => 
 
 const addNewSong = async (req:Request, res: Response, next:NextFunction) =>{
     try{
+        const userData = req.jwtDecoded;
+        const userId = userData?.userInfo?.userId;
         const { title, artist, genre, description, lyrics } = req.body;
-
         const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
         };
@@ -86,7 +87,7 @@ const addNewSong = async (req:Request, res: Response, next:NextFunction) =>{
         lyrics,
         fileaudio: files.fileaudio[0].buffer,
         };
-        const result = await SongService.addNewSong(songRequest)
+        const result = await SongService.addNewSong(userId,songRequest)
          res.status(StatusCodes.OK).json(result)
     }catch(e){
         next(e)
@@ -95,6 +96,8 @@ const addNewSong = async (req:Request, res: Response, next:NextFunction) =>{
 
 const updateSong = async (req:Request, res: Response, next:NextFunction) =>{
     try{
+        const userData = req.jwtDecoded;
+        const userId = userData?.userInfo?.userId;
         const { title, artist, genre, description, lyrics } = req.body;
         const {song_id} = req.params;
         const files = req.files as {
@@ -114,7 +117,7 @@ const updateSong = async (req:Request, res: Response, next:NextFunction) =>{
         lyrics,
         fileaudio: files?.fileaudio?.[0]?.buffer ?? null,
         };
-        const result = await SongService.updateSong(songRequest,song_id)
+        const result = await SongService.updateSong(userId,songRequest,song_id)
         res.status(StatusCodes.OK).json(result)
     }catch(e){
         next(e)
@@ -123,8 +126,10 @@ const updateSong = async (req:Request, res: Response, next:NextFunction) =>{
 
 const deletedSong = async (req:Request, res: Response, next:NextFunction) => {
     try{
+        const userData = req.jwtDecoded;
+        const userId = userData?.userInfo?.userId;
         const {song_id} = req.params;
-        const result = await SongService.deletedsong(song_id);
+        const result = await SongService.deletedsong(userId,song_id);
         res.status(StatusCodes.OK).json(result)
     }catch(e){
         next(e);
