@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     deletedAt: Date,
     account_id: {
         type:mongoose.Schema.Types.ObjectId,
+        ref: 'Account',
         unique: true,
         required: true,
     }

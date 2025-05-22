@@ -10,8 +10,8 @@ const AccountSchema = new mongoose.Schema(
             unique: true,
             match: [/^0\d{9,10}$/, 'Số điện thoại không hợp lệ']
         },
-        role_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true},
-        deleted: {type: Boolean,default: false}
+        role_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true, default: new mongoose.Types.ObjectId("681b1c1327419f6f6416e116")}, // Default role_id, change as needed
+        deleted: {type: Boolean, default: false}
     },
     {
         timestamps: true

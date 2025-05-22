@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const PlaylistSchema = new mongoose.Schema({
     name: { type: String, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  
+
     songs: [
       {
         songId: { type: mongoose.Schema.Types.ObjectId, ref: 'Song' },

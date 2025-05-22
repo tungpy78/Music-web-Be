@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import Playlist from "../models/Playlist.model"
 import ApiError from "../Utils/AppError";
 import { Types } from "mongoose";
+import User from "../models/User.model";
 
 const getPlayListService = async (userId: string) => {
     const playlist = await Playlist.find({
@@ -19,9 +20,15 @@ const getPlayListByIdService = async (playlistId: String) => {
                 model: 'Artist', // Đảm bảo bạn dùng đúng tên model
             }
         })
-        .populate('userId') // Lấy thông tin người tạo playlist
+        if (!playlistdetail) return null;
 
-    return playlistdetail;
+        const user = await User.findOne({ account_id: playlistdetail.userId }).select('fullname');
+
+        return {
+            ...playlistdetail.toObject(),
+            userFullname: user?.fullname || 'Không rõ',
+        };
+
 }
 const removeSongPlayListService = async(songId:string, playlistId: string, userId:string) => {
     const playlist = await Playlist.findById(playlistId)

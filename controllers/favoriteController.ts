@@ -4,7 +4,7 @@ import { favoriteService } from "../services/favoriteService";
 
 const getFavorite = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userId = req.jwtDecoded.userInfo._id
+        const userId = req.jwtDecoded.userInfo.userId
         const result = await favoriteService.getFavoriteService(userId)
 
         res.status(StatusCodes.OK).json(result)

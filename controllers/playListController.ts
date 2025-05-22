@@ -4,9 +4,10 @@ import { PlayListService } from "../services/playListService";
 
 const getPlayList = async (req:Request, res:Response, next: NextFunction) => {
     try {
-        const userId = req.jwtDecoded.userInfo._id
+        const userId = req.jwtDecoded.userInfo.userId
 
         const result = await PlayListService.getPlayListService(userId)
+        
         res.status(StatusCodes.OK).json(result)
     } catch (error) {
         next(error) 
@@ -25,7 +26,7 @@ const getPlayListById = async (req:Request, res:Response, next: NextFunction) =>
 const removeSongPlayList = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const {songId,playlistId} = req.params
-        const userId = req.jwtDecoded.userInfo._id
+        const userId = req.jwtDecoded.userInfo.userId
 
 
         const result = await PlayListService.removeSongPlayListService(songId,playlistId,userId)
@@ -38,7 +39,7 @@ const removeSongPlayList = async (req:Request, res:Response, next:NextFunction) 
 const deletePlayList = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const {playlistId} = req.params
-        const userId = req.jwtDecoded.userInfo._id
+        const userId = req.jwtDecoded.userInfo.userId
         const response = await PlayListService.deletePlayListService(playlistId,userId)
         res.status(StatusCodes.OK).json(response)
     } catch (error) {

@@ -6,7 +6,7 @@ import { SongRequest } from "../Request/SongRequest"
 const getSongs = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const { songid } = req.params;
-        const userId = req.jwtDecoded.userInfo._id;
+        const userId = req.jwtDecoded.userInfo.userId;
         
         const response = await SongService.getSongService(songid,userId ?? "");
 
@@ -15,10 +15,23 @@ const getSongs = async (req:Request, res:Response, next:NextFunction) => {
         next(error);
     }
 }
+const searchSong = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        const { keyword } = req.query;
+
+
+        const result = await SongService.searchSongService(keyword as string);
+
+        res.status(StatusCodes.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
 const toggleFavorite = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const { songid } = req.params;
-        const userId = req.jwtDecoded.userInfo._id;
+        const userId = req.jwtDecoded.userInfo.userId;
         
         const result = await SongService.toggleFavoriteService(songid, userId);
         res.status(StatusCodes.OK).json(result)
@@ -30,7 +43,7 @@ const toggleFavorite = async (req:Request, res:Response, next:NextFunction) => {
 const addSongIntoPlayList = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const {songid} = req.params;
-        const userId = req.jwtDecoded.userInfo._id;
+        const userId = req.jwtDecoded.userInfo.userId;
         const playListId = req.body.playListId
 
         const result = await SongService.addSongIntoPlayListService(songid,userId,playListId)
@@ -42,7 +55,7 @@ const addSongIntoPlayList = async (req:Request, res:Response, next:NextFunction)
 const createPlayList = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {songid} = req.params;
-        const userId = req.jwtDecoded.userInfo._id;
+        const userId = req.jwtDecoded.userInfo.userId;
         const name = req.body.name
 
         const result = await SongService.createPlayListService(songid,userId,name)
@@ -55,7 +68,7 @@ const addHistorySong = async (req:Request, res: Response, next:NextFunction) => 
     try {
         const {songid} = req.params;
         
-        const userId = req.jwtDecoded.userInfo._id;
+        const userId = req.jwtDecoded.userInfo.userId;
 
         const result = await SongService.addHistoryService(songid,userId)
         res.status(StatusCodes.OK).json(result)
@@ -86,5 +99,6 @@ export const SongController = {
     addSongIntoPlayList,
     createPlayList,
     addHistorySong,
-    addNewSong
+    addNewSong,
+    searchSong
 }

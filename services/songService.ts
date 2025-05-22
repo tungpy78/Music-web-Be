@@ -8,10 +8,9 @@ import Playlist from "../models/Playlist.model"
 import History from "../models/History.model"
 import { SongRequest } from "../Request/SongRequest"
 import { toSlug } from "../Utils/ToSlug"
+import { removeVietnameseTones } from "../Utils/removeVietnameseTones"
 
 const getSongService = async (songId: string, userId: string) => {
-    console.log("userId",userId)
-    console.log("songId",songId)
     const song = await Song.findById(songId)
     .populate("artist")
     .populate("genre")
@@ -22,6 +21,7 @@ const getSongService = async (songId: string, userId: string) => {
             userId: userId
         }
     )
+ 
     const playList = await Playlist.find(
         {
             userId:userId,
@@ -42,6 +42,34 @@ const getSongService = async (songId: string, userId: string) => {
         allPlayList
     }
 }
+
+const searchSongService = async (keyword: string) => {
+  if (!keyword || typeof keyword !== 'string') {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Keyword is required and must be a string");
+  }
+
+  const keywordNoTone = removeVietnameseTones(keyword).toLowerCase();
+
+  // Lấy tất cả bài hát
+  const allSongs = await Song.find()
+    .populate("artist")
+    .populate("genre");
+
+  // Lọc theo title hoặc artist.name không dấu
+  const filteredSongs = allSongs.filter(song => {
+    const titleNoTone = removeVietnameseTones(song.title).toLowerCase();
+    const artistNameNoTone = song.artist && 'name' in song.artist
+      ? removeVietnameseTones((song.artist as any).name).toLowerCase()
+      : '';
+
+    return titleNoTone.includes(keywordNoTone) || artistNameNoTone.includes(keywordNoTone);
+  });
+
+
+  return filteredSongs;
+};
+
+
 const toggleFavoriteService = async (songId: string, userId: string) => {
     const existing = await Favorite.findOne({ songId, userId });
 
@@ -139,5 +167,6 @@ export const SongService = {
     addSongIntoPlayListService,
     createPlayListService,
     addHistoryService,
-    addNewSong
+    addNewSong,
+    searchSongService   
 }
