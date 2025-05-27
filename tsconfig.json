@@ -8,9 +8,5 @@
       "outDir": "./dist",
       "forceConsistentCasingInFileNames": true,
       "strict": true             
-  },
-  "scripts": {
-  "build": "tsc",
-  "start": "node dist/index.js"
   }
 }
