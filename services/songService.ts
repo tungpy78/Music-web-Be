@@ -1,11 +1,17 @@
 import { StatusCodes } from "http-status-codes"
-import Song from "../models/song.model"
+import Song from "../models/Song.model"
 import ApiError from "../Utils/AppError"
 import mongoose from "mongoose"
-import Favorite from "../models/favorite.model"
+import Favorite from "../models/Favorite.model"
 import { JwtProvider } from "../providers/JwtProvider"
 import Playlist from "../models/Playlist.model"
 import History from "../models/History.model"
+import { SongRequest } from "../Request/SongRequest"
+import { toSlug } from "../Utils/ToSlug"
+import Cloudinary from "../Utils/Cloudinary"
+import Artist from "../models/Artist.model"
+import Topic from "../models/Topic.model"
+import { HistoryActionService } from "./HistoryActionService"
 
 const getSongService = async (songId: string, userId: string) => {
     console.log("userId",userId)
@@ -112,11 +118,163 @@ const addHistoryService = async(songId:string, userId:string)=> {
     }
 }
 
+const addNewSong = async(userId: string, songRequest: SongRequest)=>{
+    try{
+       const audioUrl = await Cloudinary.uploadToCloudinary(songRequest.fileaudio, {
+        resource_type: 'video',
+        folder: 'songs/audio',
+        });
+
+        const avatarUrl = await Cloudinary.uploadToCloudinary(songRequest.fileavatar, {
+        resource_type: 'image',
+        folder: 'songs/avatar',
+        });
+        const artist = await Artist.findById(songRequest.artist);
+        if(!artist){
+            throw new Error("Tác giả không tồn tại")
+        }
+        const genre = await Topic.findById(songRequest.genre);
+        if(!genre){
+            throw new Error("Không có thể loại tương ứng")
+        }
+        const song = new Song();
+        Object.assign(song, {
+            ...songRequest,
+            artist: new mongoose.Types.ObjectId(songRequest.artist),
+            genre: new mongoose.Types.ObjectId(songRequest.genre),
+            audio: audioUrl,
+            avatar: avatarUrl
+        });
+        song.slug = toSlug(songRequest.title)
+        const saveSong = await song.save();
+        await HistoryActionService.create(userId,"Thêm bài hát mới: "+song.id);
+        return "Thêm thành công ";
+    }catch(e){
+      throw new Error("Lỗi khi thêm nhạc: "+ e);
+    }
+
+}
+
+const updateSong = async (userId: string, songRequest: SongRequest,song_id: string) => {
+    try{
+        const song = await Song.findById(song_id)
+        if(!song){
+            throw new Error("Không tìm thấy bài hát tương ứng: ");
+        }
+
+        const artist = await Artist.findById(songRequest.artist);
+        if(!artist){
+            throw new Error("Tác giả không tồn tại")
+        }
+
+        const genre = await Topic.findById(songRequest.genre);
+        if(!genre){
+            throw new Error("Không có thể loại tương ứng")
+        }
+
+        let content =`Đã thay đổi các thuộc tính của song ${song_id}:\n`;
+        let hasChanges = false;
+        if (songRequest.fileavatar) {
+            const avatarUrl = await Cloudinary.uploadToCloudinary(songRequest.fileavatar, {
+                resource_type: 'image',
+                folder: 'songs/avatar',
+            });
+            content += `- Ảnh đại diện: ${song.avatar} -> ${avatarUrl}\n`;
+            song.avatar = avatarUrl;
+            hasChanges = true;
+        }
+
+        if (songRequest.fileaudio) {
+            const audioUrl = await Cloudinary.uploadToCloudinary(songRequest.fileaudio, {
+                resource_type: 'video',
+                folder: 'songs/audio',
+            });
+            content += `- Audio: ${song.audio} -> ${audioUrl}\n`;
+            song.audio = audioUrl;
+            hasChanges = true;
+        }
+
+        if (songRequest.title !== song.title) {
+            content += `- Tiêu đề: ${song.title} -> ${songRequest.title}\n`;
+            song.title = songRequest.title;
+            song.slug = toSlug(songRequest.title);
+            hasChanges = true;
+        }
+
+        if (songRequest.description !== song.description) {
+            content += `- Mô tả: ${song.description} -> ${songRequest.description}\n`;
+            song.description = songRequest.description;
+            hasChanges = true;
+        }
+
+        if (songRequest.lyrics !== song.lyrics) {
+            content += `- Lời bài hát: ${song.lyrics} -> ${songRequest.lyrics}\n`;
+            song.lyrics = songRequest.lyrics;
+            hasChanges = true;
+        }
+
+        const newArtistId = new mongoose.Types.ObjectId(songRequest.artist);
+        if (song.artist.toString() !== newArtistId.toString()) {
+            content += `- Tác giả: ${song.artist} -> ${newArtistId}\n`;
+            song.artist = newArtistId;
+            hasChanges = true;
+        }
+
+        const newGenreId = new mongoose.Types.ObjectId(songRequest.genre);
+        if (song.genre.toString() !== newGenreId.toString()) {
+            content += `- Thể loại: ${song.genre} -> ${newGenreId}\n`;
+            song.genre = newGenreId;
+            hasChanges = true;
+        }
+
+        if (hasChanges) {
+            await song.save();
+            await HistoryActionService.create(userId, content);
+        }
+
+        return "update thành công"
+    }catch(e){
+        throw new Error("Lỗi khi thay đổi thông tin: "+e);
+    }
+}
+
+const deletedsong = async(userId: string, song_id: string) => {
+    try{
+        const song = await Song.findById(song_id);
+        if(!song){
+            throw new Error("Không tìm thấy bài hát tương ứng: ");
+        }
+        song.deleted = true;
+        await song.save();
+        await HistoryActionService.create(userId,"Đã xóa bài hát: "+song_id);
+        return "Xóa thành công"
+    }catch(e){
+        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+    }
+}
+
+const restoresong = async(song_id: string) => {
+    try{
+        const song = await Song.findById(song_id);
+        if(!song){
+            throw new Error("Không tìm thấy bài hát tương ứng: ");
+        }
+        song.deleted = false;
+        await song.save();
+        return "Khôi phục thành công"
+    }catch(e){
+        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+    }
+}
 
 export const SongService = {
     getSongService,
     toggleFavoriteService,
     addSongIntoPlayListService,
     createPlayListService,
-    addHistoryService
+    addHistoryService,
+    addNewSong,
+    updateSong,
+    deletedsong,
+    restoresong
 }

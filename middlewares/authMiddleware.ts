@@ -25,10 +25,7 @@ const isAuthorized = async (req: Request, res: Response, next: NextFunction) => 
             accessTokenFromHeader.substring("Bearer ".length),
             process.env.ACCESS_TOKEN_SECRET_SIGNATURE as string
         );
-
         req.jwtDecoded = accessTokenDecoded;
-        
-
         next();
 
     } catch (error: Error | any) {
@@ -43,7 +40,47 @@ const isAuthorized = async (req: Request, res: Response, next: NextFunction) => 
         res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized: Please Login." });
     }
 }
+
+const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await isAuthorized(req, res, async () => {
+
+      const userData = req.jwtDecoded;
+      if (userData?.userInfo?.role=== "Admin") {
+        next();
+      } else {
+        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an admin." +  JSON.stringify(userData),});
+        return;
+      }
+    });
+  } catch (error) {
+    res.status(StatusCodes.UNAUTHORIZED).json({message: "Unauthorized: Please Login.",});
+    return;
+  }    
+}
+
+const isManager = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await isAuthorized(req, res, async () => {
+
+      const userData = req.jwtDecoded;
+      
+      if (userData?.userInfo?.role === "Admin"||userData?.userInfo?.role === "Manager") {
+        next();
+      } else {
+        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an Manager." + JSON.stringify(userData),});
+        return;
+      }
+    });
+  } catch (error) {
+    res.status(StatusCodes.UNAUTHORIZED).json({message: "Unauthorized: Please Login.",});
+    return;
+  }
+}
+
 export const AuthMiddleware = {
-    isAuthorized
+    isAuthorized,
+    isAdmin,
+    isManager
 }
   
