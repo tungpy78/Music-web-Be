@@ -13,6 +13,19 @@ const getTopics = async (req: Request, res: Response, next: NextFunction) => {
         next(error);
     }
 };
+
+const getTopicById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { topicId } = req.params;
+        const result = await TopicService.getTopicByIdService(topicId);
+        
+        res.status(StatusCodes.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
 export const TopicController = {
-    getTopics
+    getTopics,
+    getTopicById
 }

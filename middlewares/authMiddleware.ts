@@ -1,0 +1,49 @@
+import { NextFunction , Request, Response} from "express";
+
+// Extend the Request interface to include jwtDecoded
+declare global {
+  namespace Express {
+    interface Request {
+      jwtDecoded?: any;
+    }
+  }
+}
+import { StatusCodes } from "http-status-codes";
+import { JwtProvider } from "../providers/JwtProvider";
+import { TokenExpiredError } from "jsonwebtoken";
+
+const isAuthorized = async (req: Request, res: Response, next: NextFunction) => {
+  // Simulate authorization logic
+  const accessTokenFromHeader = req.headers.authorization
+  
+    if (!accessTokenFromHeader) {
+        res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized: (Token not found)" });
+        return;
+    }
+    try {
+        const accessTokenDecoded = await JwtProvider.verifyToken(
+            accessTokenFromHeader.substring("Bearer ".length),
+            process.env.ACCESS_TOKEN_SECRET_SIGNATURE as string
+        );
+
+        req.jwtDecoded = accessTokenDecoded;
+        
+
+        next();
+
+    } catch (error: Error | any) {
+      console.log("Token error:", error.message);
+
+        //truong hop token het han
+        if(error instanceof TokenExpiredError) {
+            res.status(StatusCodes.GONE).json({ message: "Need to refresh Token" });
+            return;
+        }
+        //truong hop token khong hop le
+        res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized: Please Login." });
+    }
+}
+export const AuthMiddleware = {
+    isAuthorized
+}
+  

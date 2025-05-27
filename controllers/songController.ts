@@ -1,0 +1,72 @@
+import { NextFunction, Request, Response } from "express";
+import { SongService } from "../services/songService";
+import { StatusCodes } from "http-status-codes";
+
+const getSongs = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        const { songid } = req.params;
+        const userId = req.jwtDecoded.userInfo._id;
+        
+        const response = await SongService.getSongService(songid,userId ?? "");
+
+        res.status(StatusCodes.OK).json(response);
+    } catch (error) {
+        next(error);
+    }
+}
+const toggleFavorite = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        const { songid } = req.params;
+        const userId = req.jwtDecoded.userInfo._id;
+        
+        const result = await SongService.toggleFavoriteService(songid, userId);
+        res.status(StatusCodes.OK).json(result)
+    } catch (error) {
+        next(error)
+    }
+}
+
+const addSongIntoPlayList = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        const {songid} = req.params;
+        const userId = req.jwtDecoded.userInfo._id;
+        const playListId = req.body.playListId
+
+        const result = await SongService.addSongIntoPlayListService(songid,userId,playListId)
+        res.status(StatusCodes.OK).json(result)
+    } catch (error) {
+        next(error);
+    }
+}
+const createPlayList = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const {songid} = req.params;
+        const userId = req.jwtDecoded.userInfo._id;
+        const name = req.body.name
+
+        const result = await SongService.createPlayListService(songid,userId,name)
+        res.status(StatusCodes.OK).json(result)
+    } catch (error) {
+        next(error)
+    }
+}
+const addHistorySong = async (req:Request, res: Response, next:NextFunction) => {
+    try {
+        const {songid} = req.params;
+        
+        const userId = req.jwtDecoded.userInfo._id;
+
+        const result = await SongService.addHistoryService(songid,userId)
+        res.status(StatusCodes.OK).json(result)
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const SongController = {
+    getSongs,
+    toggleFavorite,
+    addSongIntoPlayList,
+    createPlayList,
+    addHistorySong
+}
