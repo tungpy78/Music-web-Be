@@ -5,7 +5,13 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
-
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
   backend:
     build: .
     container_name: music-backend
@@ -13,6 +19,10 @@ services:
       - "5000:5000"
     depends_on:
       - redis
+      - mongo
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - MONGO_URL=mongodb+srv://chinh:chinh123@websitemusic.0cjbbpj.mongodb.net/music_app?retryWrites=true&w=majority&appName=WebsiteMusic
+volumes:
+  mongo-data:
