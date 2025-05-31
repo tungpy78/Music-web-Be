@@ -28,16 +28,12 @@ const getTopicById = async (req: Request, res: Response, next: NextFunction) => 
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const userData = req.jwtDecoded;
+         const userData = req.jwtDecoded;
         const userId = userData?.userInfo?.userId;
-        const { title, description} = req.body;
+        const { title, description } = req.body;
         const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
         };
-        if ( !title || !files?.fileAvata?.length) {
-         res.status(400).json({message: 'Thiếu trường bắt buộc: title, avatar'+ files?.fileAvata?.length , });
-          return;
-        }
         const topicRequest: TopicRuquest = {
             title,
             fileAvata: files.fileAvata[0].buffer,
