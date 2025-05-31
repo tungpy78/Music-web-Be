@@ -1,5 +1,9 @@
 import Redis from 'ioredis';
-const redis = new Redis();
+const redis = new Redis(
+    {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: Number(process.env.REDIS_PORT) || 6379,
+  });
 
 const saveOTP = async (email: string, otp: string, expireSeconds = 300) => {
   await redis.set(`otp:${email}`, otp, 'EX', expireSeconds);

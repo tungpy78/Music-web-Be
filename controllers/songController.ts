@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { SongService } from "../services/songService";
 import { StatusCodes } from "http-status-codes";
-import { SongRequest } from "../Request/SongRequest"
+import { SongRequest } from "../Request/SongRequest";
 
 const getSongs = async (req:Request, res:Response, next:NextFunction) => {
     try {
@@ -167,7 +167,6 @@ export const SongController = {
     addNewSong,
     updateSong,
     deletedSong,
-    restoreSong
-    addNewSong,
+    restoreSong,
     searchSong
 }
