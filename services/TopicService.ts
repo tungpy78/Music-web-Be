@@ -80,7 +80,7 @@ const updateTopic = async(userId: string , topicRequset: TopicRuquest,topicId : 
             hasChanges = true;
         }
 
-        if (topicRequset.title !== topic.title) {
+        if (topicRequset.title !== topic.title ) {
             content += `- Tiêu đề: ${topic.title} -> ${topicRequset.title}\n`;
             topic.title = topicRequset.title;
             topic.slug = toSlug(topicRequset.title);

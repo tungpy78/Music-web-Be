@@ -6,6 +6,7 @@ import { StatusCodes } from "http-status-codes";
 const create = async(req: Request, res: Response, next: NextFunction) => {
     try{
         const {name,bio } = req.body
+        const userId = req.jwtDecoded.userInfo.userId;
          const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
         };
@@ -18,7 +19,7 @@ const create = async(req: Request, res: Response, next: NextFunction) => {
             bio: bio,
             fileAvata: files.fileAvata[0].buffer
         }
-        const result = await ArtistService.create(artistRequest)
+        const result = await ArtistService.create(userId,artistRequest)
         res.status(StatusCodes.OK).json(result)
     }catch(e){
         next(e)
@@ -38,6 +39,7 @@ const updateArtist = async (req: Request, res: Response, next: NextFunction) => 
     try{
         const {name, bio } = req.body
         const {artist_id} = req.params
+        const userId = req.jwtDecoded.userInfo.userId;
         const files = req.files as {
             [fieldname: string]: Express.Multer.File[];
         };
@@ -50,7 +52,7 @@ const updateArtist = async (req: Request, res: Response, next: NextFunction) => 
             bio: bio,
             fileAvata: files?.fileAvata?.[0]?.buffer ?? null
         }
-        const result = await ArtistService.updateArtist(artistRequest,artist_id)
+        const result = await ArtistService.updateArtist(userId,artistRequest,artist_id)
         res.status(StatusCodes.OK).json(result)
     }catch(e){
         next(e)

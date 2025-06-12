@@ -86,11 +86,6 @@ const addNewSong = async (req:Request, res: Response, next:NextFunction) =>{
         [fieldname: string]: Express.Multer.File[];
         };
 
-        if ( !title || !artist || !genre || !files?.fileavatar?.length || !files?.fileaudio?.length) {
-         res.status(400).json({message: 'Thiếu trường bắt buộc: title, artist, genre, avatar, audio',});
-          return;
-        }
-
         const songRequest: SongRequest = {
         title,
         artist,
@@ -111,16 +106,11 @@ const updateSong = async (req:Request, res: Response, next:NextFunction) =>{
     try{
         const userData = req.jwtDecoded;
         const userId = userData?.userInfo?.userId;
-        const { title, artist, genre, description, lyrics } = req.body;
+        const { title, artist, genre, description, lyrics} = req.body;
         const {song_id} = req.params;
         const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
         };
-
-        if ( !title || !artist || !genre) {
-         res.status(400).json({message: 'Thiếu trường bắt buộc: title, artist, genre',});
-          return;
-        }
         const songRequest: SongRequest = {
         title,
         artist,

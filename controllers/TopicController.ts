@@ -55,10 +55,6 @@ const updateTopic = async (req: Request, res: Response, next: NextFunction) => {
         const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
         };
-        if (!title) {
-            res.status(400).json({message: 'Thiếu trường bắt buộc: title',});
-            return;
-        }
         const topicRequest: TopicRuquest = {
             title,
             fileAvata: files?.fileAvata?.[0]?.buffer ?? null,
