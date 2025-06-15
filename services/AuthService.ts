@@ -101,11 +101,39 @@ const setPassDefault = async ( account_id: string) => {
         throw new Error("Lỗi khi set pass default"+ e);
     }
 }
+
+const getAccount = async () => {
+  const accounts = await Account.find({}, 'phone password role_id');
+
+  if (!accounts || accounts.length === 0) {
+    throw new Error("No accounts found.");
+  }
+
+  const result = [];
+
+  for (const account of accounts) {
+    const user = await User.findOne({ account_id: account._id }, 'fullname email status deleted');
+    const role = await RoleModel.findOne({ _id: account.role_id }, 'role_name');
+
+    result.push({
+      phone: account.phone,
+      password: account.password,
+      role_name: role?.role_name || null,
+      fullname: user?.fullname || null,
+      email: user?.email || null,
+      status: user?.status || null,
+      deleted: user?.deleted || null
+    });
+  }
+
+  return result;
+};
 export const AuthService ={
     createAccount,
     setRole,
     getRole,
     setDelete,
     setpassword,
-    setPassDefault
+    setPassDefault,
+    getAccount
 }
