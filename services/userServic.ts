@@ -21,7 +21,7 @@ const loginService = async (phone: string, password: string) => {
         throw new ApiError(StatusCodes.NOT_FOUND, "User không tồn tại");
     }
 
-    const userInfo = await User.findOne({ account_id: user._id, deleted: false });
+    const userInfo = await User.findOne({ account_id: user._id});
     console.log("userInfo", userInfo)
 
     if (!userInfo) {

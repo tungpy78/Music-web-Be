@@ -103,8 +103,7 @@ const setPassDefault = async ( account_id: string) => {
 }
 
 const getAccount = async () => {
-  const accounts = await Account.find({}, 'phone password role_id');
-
+  const accounts = await Account.find({role_id: new mongoose.Types.ObjectId("681b1c1327419f6f6416e117")}, 'phone password role_id');
   if (!accounts || accounts.length === 0) {
     throw new Error("No accounts found.");
   }
