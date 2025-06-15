@@ -11,15 +11,6 @@ const userSchema = new mongoose.Schema({
         type:String,
         required: true,
     },
-    status: {
-        type: String,
-        enum: ["active", "inactive"],
-        default: "active",
-    },
-    deleted: {
-        type: Boolean,
-        default: false,
-    },
     deletedAt: Date,
     account_id: {
         type:mongoose.Schema.Types.ObjectId,

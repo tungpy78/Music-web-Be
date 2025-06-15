@@ -13,7 +13,7 @@ import { console } from "inspector"
 
 const loginService = async (phone: string, password: string) => {
 
-    const user = await Account.findOne({ phone, deleted: false })
+    const user = await Account.findOne({ phone, deleted: false , status: "active" })
         .select("+password")
         .populate("role_id", "role_name")   // join colection chỉ lấy field role_name
 
@@ -21,7 +21,8 @@ const loginService = async (phone: string, password: string) => {
         throw new ApiError(StatusCodes.NOT_FOUND, "User không tồn tại");
     }
 
-    const userInfo = await User.findOne({ account_id: user._id, deleted: false });
+    const userInfo = await User.findOne({ account_id: user._id });
+
     console.log("userInfo", userInfo)
 
     if (!userInfo) {
@@ -39,7 +40,6 @@ const loginService = async (phone: string, password: string) => {
     const roleDoc = user.role_id as any;     // sau populate, role_id là object
     const payload = {
         userId:   userInfo._id,
-        username: user.username,
         phone: user.phone,
         role:     roleDoc?.role_name || "user",
         fullname: userInfo.fullname,

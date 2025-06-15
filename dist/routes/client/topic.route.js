@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.topicRoutes = void 0;
+const express_1 = require("express");
+const TopicController_1 = require("../../controllers/TopicController");
+const topic_validator_1 = require("../../validators/topic.validator");
+const router = (0, express_1.Router)();
+router.get('/', TopicController_1.TopicController.getTopics);
+router.get('/:topicId', topic_validator_1.topicValidators.getTopicById, TopicController_1.TopicController.getTopicById);
+exports.topicRoutes = router;

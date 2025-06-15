@@ -46,6 +46,25 @@ const getSongService = async (songId: string, userId: string) => {
         allPlayList
     }
 }
+const getAllSongsService = async (userId: string) => {
+  const songs = await Song.find({ deleted: false }).sort({ like: -1 })
+    .populate("artist")
+    .populate("genre");
+  return songs;
+}
+const getSongsByArtistService = async (artist_id: string) => {
+    const artist = await Artist.findById(artist_id);
+    if (!artist) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Artist not found");
+    }
+    // Lấy tất cả bài hát của nghệ sĩ đó, không bao gồm những bài đã xóa
+    // và sắp xếp theo số lượt thích giảm dần
+    // Sử dụng populate để lấy thông tin nghệ sĩ và thể loại
+    const songs = await Song.find({ artist: artist_id, deleted: false })
+      .populate("artist")
+
+    return songs;
+}
 
 const searchSongService = async (keyword: string) => {
   if (!keyword || typeof keyword !== 'string') {
@@ -90,6 +109,18 @@ const toggleFavoriteService = async (songId: string, userId: string) => {
     }
 }
 const addSongIntoPlayListService = async (songId: string, userId: string, playListId: string) => {
+    const existingPlaylist = await Playlist.findOne({
+        _id: new mongoose.Types.ObjectId(playListId),
+        userId: new mongoose.Types.ObjectId(userId),
+        'songs.songId': new mongoose.Types.ObjectId(songId)
+    });
+
+    if (existingPlaylist) {
+        return {
+            message: "Bài hát đã tồn tại trong PlayList."
+        };
+    }
+
     const addSongPlayList = await Playlist.updateOne(
         {
             _id: new mongoose.Types.ObjectId(playListId),
@@ -297,6 +328,8 @@ const restoresong = async(song_id: string) => {
 
 export const SongService = {
     getSongService,
+    getAllSongsService,
+    getSongsByArtistService,
     toggleFavoriteService,
     addSongIntoPlayListService,
     createPlayListService,
@@ -306,4 +339,5 @@ export const SongService = {
     updateSong,
     deletedsong,
     restoresong
+
 }

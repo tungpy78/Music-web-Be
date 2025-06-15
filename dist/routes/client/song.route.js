@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.songRoutes = void 0;
+const express_1 = require("express");
+const songController_1 = require("../../controllers/songController");
+const song_validator_1 = require("../../validators/song.validator");
+const router = (0, express_1.Router)();
+router.get("/search", song_validator_1.songValidators.searchSongValidator, songController_1.SongController.searchSong);
+router.get("/:songid", song_validator_1.songValidators.getSongValidator, songController_1.SongController.getSongs);
+router.get("/artist/:artist_id", songController_1.SongController.getSongsByArtist);
+router.get("/", songController_1.SongController.getAllSongs);
+router.post("/:songid/favorite", song_validator_1.songValidators.toggleFavoriteValidator, songController_1.SongController.toggleFavorite);
+router.post("/:songid/playList", song_validator_1.songValidators.addSongIntoPlayListValidator, songController_1.SongController.addSongIntoPlayList);
+router.post("/:songid/createPlaylist", song_validator_1.songValidators.createPlayListValidator, songController_1.SongController.createPlayList);
+router.post("/:songid/addHistory", song_validator_1.songValidators.addHistorySongValidator, songController_1.SongController.addHistorySong);
+exports.songRoutes = router;

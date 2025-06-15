@@ -15,6 +15,24 @@ const getSongs = async (req:Request, res:Response, next:NextFunction) => {
         next(error);
     }
 }
+const getAllSongs = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        const userId = req.jwtDecoded.userInfo.userId;
+        const response = await SongService.getAllSongsService(userId);
+        res.status(StatusCodes.OK).json(response);
+    } catch (error) {
+        next(error);
+    }
+}
+const getSongsByArtist = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        const { artist_id } = req.params;
+        const response = await SongService.getSongsByArtistService(artist_id);
+        res.status(StatusCodes.OK).json(response);
+    } catch (error) {
+        next(error);
+    }
+}
 const searchSong = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const { keyword } = req.query;
@@ -160,6 +178,8 @@ const restoreSong = async (req:Request, res: Response, next:NextFunction) => {
 
 export const SongController = {
     getSongs,
+    getAllSongs,
+    getSongsByArtist,
     toggleFavorite,
     addSongIntoPlayList,
     createPlayList,

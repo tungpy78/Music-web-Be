@@ -16,8 +16,8 @@ const getPlayList = async (req:Request, res:Response, next: NextFunction) => {
 const getPlayListById = async (req:Request, res:Response, next: NextFunction) => {
     try {
         const {playlistId} = req.params
-
-        const result = await PlayListService.getPlayListByIdService(playlistId)
+        const userId = req.jwtDecoded.userInfo.userId
+        const result = await PlayListService.getPlayListByIdService(playlistId, userId)
         res.status(StatusCodes.OK).json(result)
     } catch (error) {
         next(error)
