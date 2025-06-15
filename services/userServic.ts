@@ -22,7 +22,6 @@ const loginService = async (phone: string, password: string) => {
     }
 
     const userInfo = await User.findOne({ account_id: user._id });
-
     console.log("userInfo", userInfo)
 
     if (!userInfo) {

@@ -5,5 +5,5 @@ export interface  SongRequest {
     lyrics: string,
     fileaudio: Buffer,
     artist: string,
-    genre: string 
+    genre: string
 }

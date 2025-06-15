@@ -13,9 +13,8 @@ const createTopic = [
     .withMessage("Title không được để trống"),
 
   body("description")
-    .optional()
-    .isString()
-    .withMessage("Description phải là chuỗi"),
+    .notEmpty()
+    .withMessage("Description không được để trống"),
 
   body("fileAvata")
     .custom((value, { req }) => {
@@ -26,7 +25,28 @@ const createTopic = [
     })
 ];
 
+const updateTopic = [
+  body("title")
+    .notEmpty()
+    .withMessage("Title không được để trống"),
+
+  body("description")
+    .notEmpty()
+    .withMessage("Description không được để trống"),
+
+  param( "topicId")
+    .isMongoId().withMessage("Topic ID không hợp lệ")
+    .notEmpty().withMessage("Topic ID không được để trống"),
+];
+
+const deletedtopic = [
+  param( "topicId")
+    .isMongoId().withMessage("Topic ID không hợp lệ")
+    .notEmpty().withMessage("Topic ID không được để trống")
+]
 export const topicValidators = {
     getTopicById,
-    createTopic
+    createTopic,
+    updateTopic,
+    deletedtopic
 }   

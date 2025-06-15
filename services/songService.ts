@@ -205,7 +205,7 @@ const addNewSong = async(userId: string, songRequest: SongRequest)=>{
             avatar: avatarUrl
         });
         song.slug = toSlug(songRequest.title)
-        const saveSong = await song.save();
+        await song.save();
         await HistoryActionService.create(userId,"Thêm bài hát mới: "+song.id);
         return "Thêm thành công ";
     }catch(e){
@@ -225,6 +225,7 @@ const updateSong = async (userId: string, songRequest: SongRequest,song_id: stri
         if(!artist){
             throw new Error("Tác giả không tồn tại")
         }
+
 
         const genre = await Topic.findById(songRequest.genre);
         if(!genre){

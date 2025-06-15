@@ -67,11 +67,21 @@ const setPassDefault = async(req: Request, res: Response, next: NextFunction) =>
         next(e);
     }
 }
+
+const getAccount = async(req: Request, res: Response, next: NextFunction) => {
+    try{
+        const result = await AuthService.getAccount();
+        res.status(StatusCodes.OK).json(result);
+    }catch(e){
+        next(e);
+    }
+}
 export const AuthController = {
     createAccount,
     setRole,
     getRole,
     setDelete,
     setpassword,
-    setPassDefault
+    setPassDefault,
+    getAccount
 }
