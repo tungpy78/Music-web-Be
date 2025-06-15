@@ -120,8 +120,8 @@ const getAccount = async () => {
       role_name: role?.role_name || null,
       fullname: user?.fullname || null,
       email: user?.email || null,
-      status: user?.status || null,
-      deleted: user?.deleted || null
+      status: account?.status || null,
+      deleted: account?.deleted || null
     });
   }
 
