@@ -115,13 +115,14 @@ const getAccount = async () => {
     const role = await RoleModel.findOne({ _id: account.role_id }, 'role_name');
 
     result.push({
-      phone: account.phone,
-      password: account.password,
-      role_name: role?.role_name || null,
-      fullname: user?.fullname || null,
-      email: user?.email || null,
-      status: account?.status || null,
-      deleted: account?.deleted || null
+        id: account.id,
+        phone: account.phone,
+        password: account.password,
+        role_name: role?.role_name || null,
+        fullname: user?.fullname || null,
+        email: user?.email || null,
+        status: account?.status || null,
+        deleted: account?.deleted || null
     });
   }
 
