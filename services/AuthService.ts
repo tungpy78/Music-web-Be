@@ -12,7 +12,7 @@ const  createAccount = async(authRequest : AuthRequest) => {
         Object.assign(account,authRequest);
         const hashedPassword =await bcrypt.hash(authRequest.password, 10);
         account.password = hashedPassword
-        account.role_id = new mongoose.Types.ObjectId("681b1c1327419f6f6416e116");
+        account.role_id = new mongoose.Types.ObjectId("681b1c1327419f6f6416e117");
         await account.save();
         const user = new User();
         user.fullname = authRequest.fullname;
