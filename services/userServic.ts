@@ -13,7 +13,7 @@ import { console } from "inspector"
 
 const loginService = async (phone: string, password: string) => {
 
-    const user = await Account.findOne({ phone, deleted: false , status: "active" })
+    const user = await Account.findOne({ phone, deleted: false , status: true })
         .select("+password")
         .populate("role_id", "role_name")   // join colection chỉ lấy field role_name
 

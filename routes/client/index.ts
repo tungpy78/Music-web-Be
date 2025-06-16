@@ -6,6 +6,8 @@ import { songRoutes } from "./song.route";
 import { playlistRoutes } from "./playlist.route";
 import { favoriteRouter } from "./favorite.route";
 import { histotyRoute } from "./history.route";
+import { AlbumRouter } from "./album.route";
+import { ArtistRouter } from "./artist.route";
 
 
 const clientRoutes = (app: Express): void => {
@@ -13,6 +15,8 @@ const clientRoutes = (app: Express): void => {
     app.use(`/topic`,AuthMiddleware.isAuthorized ,topicRoutes);
     app.use(`/song`,AuthMiddleware.isAuthorized ,songRoutes);
     app.use(`/playlist`,AuthMiddleware.isAuthorized ,playlistRoutes);
+    app.use('/album', AuthMiddleware.isAuthorized, AlbumRouter);
+    app.use('/artist', AuthMiddleware.isAuthorized, ArtistRouter);
     app.use(`/favorite`,AuthMiddleware.isAuthorized, favoriteRouter)
     app.use(`/history`,AuthMiddleware.isAuthorized, histotyRoute)
     app.use(`/auth`, userRouter);

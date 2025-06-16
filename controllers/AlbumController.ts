@@ -88,7 +88,24 @@ const removeSongFromAlbum = async(req: Request, res: Response, next: NextFunctio
         next(e)
     }
 }
-
+const getAllAlbum = async(req: Request, res: Response, next: NextFunction) => {
+    try{
+        const result = await AlbumService.getAllAlbumservice();
+        res.status(StatusCodes.OK).json(result);
+    }catch(e){
+        next(e)
+    }
+}
+const getAlbumById = async(req: Request, res: Response, next: NextFunction) => {
+    try{
+        const {albumId} = req.params;
+        console.log(albumId);
+        const result = await AlbumService.getAlbumByIdService(albumId);
+        res.status(StatusCodes.OK).json(result);
+    }catch(e){
+        next(e)
+    }
+}
 
 export const AlbumController = {
     create,
@@ -96,5 +113,7 @@ export const AlbumController = {
     updateAlbum,
     deletedAlbum,
     addSongToAlbum,
-    removeSongFromAlbum
+    removeSongFromAlbum,
+    getAlbumById,
+    getAllAlbum
 }

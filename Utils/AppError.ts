@@ -2,7 +2,7 @@
 /**
  * Định nghĩa riêng một Class ApiError kế thừa class Error sẵn (điều này cần thiết và là Best Practice vì class Error nó là class built-in sẵn)
  */
-class AppError extends Error {
+class ApiError extends Error {
     public statusCode: number
     
     constructor(statusCode: number, message:string) {
@@ -21,4 +21,4 @@ class AppError extends Error {
     }
   }
   
-  export default AppError
+  export default ApiError
