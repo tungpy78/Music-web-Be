@@ -3,7 +3,6 @@ import { AritistRequest } from "../Request/ArtistRequest"
 import ApiError from "../Utils/AppError";
 import Cloudinary from "../Utils/Cloudinary";
 import { HistoryActionService } from "./HistoryActionService";
-import ApiError from "../Utils/AppError"
 import { StatusCodes } from "http-status-codes"
 
 const create = async (userId: string,aritistRequest: AritistRequest) => {
