@@ -10,9 +10,9 @@ const  createAccount = async(authRequest : AuthRequest) => {
     try{
         const account = new Account();
         Object.assign(account,authRequest);
-        const hashedPassword =await bcrypt.hash(authRequest.password, 10);
+        const hashedPassword =await bcrypt.hash("123456", 10);
         account.password = hashedPassword
-        account.role_id = new mongoose.Types.ObjectId("681b1c1327419f6f6416e116");
+        account.role_id = new mongoose.Types.ObjectId("681b1c1327419f6f6416e117");
         await account.save();
         const user = new User();
         user.fullname = authRequest.fullname;
@@ -115,13 +115,14 @@ const getAccount = async () => {
     const role = await RoleModel.findOne({ _id: account.role_id }, 'role_name');
 
     result.push({
-      phone: account.phone,
-      password: account.password,
-      role_name: role?.role_name || null,
-      fullname: user?.fullname || null,
-      email: user?.email || null,
-      status: account?.status || null,
-      deleted: account?.deleted || null
+        id: account.id,
+        phone: account.phone,
+        password: account.password,
+        role_name: role?.role_name || null,
+        fullname: user?.fullname || null,
+        email: user?.email || null,
+        status: account?.status || null,
+        deleted: account?.deleted || null
     });
   }
 

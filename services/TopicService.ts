@@ -18,6 +18,14 @@ const getTopicsService = async () => {
     return topics;
 }
 
+const getTopicsForAdmin = async () => {  
+    const topics = await Topic.find();
+    if (!topics || topics.length === 0) {
+        throw new ApiError(StatusCodes.NOT_FOUND,"No topics found.");
+    }
+    return topics;
+}
+
 const getTopicByIdService = async (topicId: string) => {
 
  
@@ -107,7 +115,7 @@ const deletedtopic = async(userId: string, topicId: string) => {
     try{
         const topic = await Topic.findById(topicId);
         if(!topic){
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new Error("Không tìm thấy thể loại tương ứng: ");
         }
         topic.deleted = true;
         await topic.save();
@@ -122,7 +130,7 @@ const restoretopic = async(topicId: string) => {
     try{
         const topic = await Topic.findById(topicId);
         if(!topic){
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new Error("Không tìm thấy thể loại tương ứng: ");
         }
         topic.deleted = false;
         await topic.save();
@@ -132,11 +140,13 @@ const restoretopic = async(topicId: string) => {
     }
 }
 
+
 export const TopicService = {
     getTopicsService,
     getTopicByIdService,
     create,
     updateTopic,
     deletedtopic,
-    restoretopic
+    restoretopic,
+    getTopicsForAdmin
 }
