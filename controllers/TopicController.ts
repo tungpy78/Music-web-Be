@@ -87,12 +87,24 @@ const restoretopic = async (req:Request, res: Response, next:NextFunction) => {
         next(e);
     }
 }
+
+const getTopicsForAdmin = async (req:Request, res: Response, next:NextFunction) => {
+    try{
+        const result = await TopicService.getTopicsForAdmin();
+        res.status(StatusCodes.OK).json(result)
+    }catch(e){
+        next(e);
+    }
+}
+
+
 export const TopicController = {
     getTopics,
     getTopicById,
     create,
     updateTopic,
     deletedtopic,
-    restoretopic
+    restoretopic,
+    getTopicsForAdmin
 
 }
