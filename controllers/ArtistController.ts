@@ -58,9 +58,19 @@ const updateArtist = async (req: Request, res: Response, next: NextFunction) => 
         next(e)
     }
 }
+const getArtistById = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+        const {artistId} = req.params
+        const result = await ArtistService.getArtistByIdService(artistId)
+        res.status(StatusCodes.OK).json(result)
+    }catch(e){
+        next(e)
+    }
+}
 
 export const ArtistController = {
     create,
     getAllArtist,
-    updateArtist
+    updateArtist,
+    getArtistById
 }

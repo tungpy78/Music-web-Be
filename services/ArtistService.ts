@@ -1,5 +1,6 @@
 import Artist from "../models/Artist.model";
 import { AritistRequest } from "../Request/ArtistRequest"
+import ApiError from "../Utils/AppError";
 import Cloudinary from "../Utils/Cloudinary";
 import { HistoryActionService } from "./HistoryActionService";
 import ApiError from "../Utils/AppError"
@@ -69,8 +70,16 @@ const updateArtist = async(userId: string, aritistRequest: AritistRequest, ariti
         throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi update Artist: "+e);
     }
 }
+const getArtistByIdService = async (artistId: string) => {
+    const artist = await Artist.findById(artistId).populate('songs').populate('albums');
+    if (!artist) {
+        throw new ApiError(404, "Không tìm thấy tác giả yêu cầu");
+    }
+    return artist;
+};
 export const ArtistService = {
     create,
     getAllArtist,
-    updateArtist
+    updateArtist,
+    getArtistByIdService 
 }

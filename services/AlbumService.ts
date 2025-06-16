@@ -167,6 +167,28 @@ const deletedAlbum = async(album_id: string, userId: string) => {
             throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi xóa bài nhạc: "+e);
         }
 }
+const getAllAlbumservice = async () => {
+    const albums = await Album.find().populate('artist', 'name')
+    if (!albums || albums.length === 0) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "No albums found.");
+    }
+    return albums;
+}
+const getAlbumByIdService = async (albumId: string) => {
+     const albums = await Album.findById(albumId)
+        .populate('artist', 'name')
+        .populate({
+            path: 'songs',
+            model: 'Song',
+            select: 'audio avatar title',
+        });
+
+    if (!albums) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Album not found.");
+    }
+
+    return albums;
+}
 
 export const AlbumService ={
     create,
@@ -174,5 +196,7 @@ export const AlbumService ={
     updateAlbum,
     deletedAlbum,
     addSongToAlbum,
-    removeSongFromAlbum
+    removeSongFromAlbum,
+    getAllAlbumservice,
+    getAlbumByIdService
 }
