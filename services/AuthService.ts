@@ -111,7 +111,7 @@ const getAccount = async () => {
   const result = [];
 
   for (const account of accounts) {
-    const user = await User.findOne({ account_id: account._id }, 'fullname email status deleted');
+    const user = await User.findOne({ account_id: account._id }, 'fullname email ');
     const role = await RoleModel.findOne({ _id: account.role_id }, 'role_name');
 
     result.push({
@@ -121,8 +121,8 @@ const getAccount = async () => {
         role_name: role?.role_name || null,
         fullname: user?.fullname || null,
         email: user?.email || null,
-        status: account?.status || null,
-        deleted: account?.deleted || null
+        status: account?.status,
+        deleted: account?.deleted
     });
   }
 
