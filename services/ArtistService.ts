@@ -2,6 +2,8 @@ import Artist from "../models/Artist.model";
 import { AritistRequest } from "../Request/ArtistRequest"
 import Cloudinary from "../Utils/Cloudinary";
 import { HistoryActionService } from "./HistoryActionService";
+import ApiError from "../Utils/AppError"
+import { StatusCodes } from "http-status-codes"
 
 const create = async (userId: string,aritistRequest: AritistRequest) => {
     try{
@@ -18,14 +20,14 @@ const create = async (userId: string,aritistRequest: AritistRequest) => {
         await HistoryActionService.create(userId,"Thêm Aritist mới: " + artist.id);
         return "Thêm tác gia thành công"
     }catch(e){
-        throw new Error("Lỗi khi thêm tác giả: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi thêm tác giả: "+e);
     }
 }
 
 const getAllArtist = async() =>{
     const artist = await Artist.find();
     if (!artist || artist.length === 0) {
-        throw new Error("No topics found.");
+        throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy nghệ sĩ nào");
     }
     return artist;
 }
@@ -34,7 +36,7 @@ const updateArtist = async(userId: string, aritistRequest: AritistRequest, ariti
     try{
         const artist = await Artist.findById(aritist_id);
         if(!artist){
-            throw new Error("Không tìm thấy tác giả yêu cầu")
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy tác giả yêu cầu")
         }
         let content =`Đã thay đổi các thuộc tính của Aritist ${aritist_id}:\n`;
         let hasChanges = false;
@@ -64,7 +66,7 @@ const updateArtist = async(userId: string, aritistRequest: AritistRequest, ariti
         }
         return " Cập nhập thành công"
     }catch(e){
-        throw new Error("Lỗi khi update Artist: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi update Artist: "+e);
     }
 }
 export const ArtistService = {

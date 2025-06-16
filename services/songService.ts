@@ -190,11 +190,11 @@ const addNewSong = async(userId: string, songRequest: SongRequest)=>{
         });
         const artist = await Artist.findById(songRequest.artist);
         if(!artist){
-            throw new Error("Tác giả không tồn tại")
+            throw new ApiError(StatusCodes.FORBIDDEN,"Tác giả không tồn tại")
         }
         const genre = await Topic.findById(songRequest.genre);
         if(!genre){
-            throw new Error("Không có thể loại tương ứng")
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không có thể loại tương ứng")
         }
         const song = new Song();
         Object.assign(song, {
@@ -209,7 +209,7 @@ const addNewSong = async(userId: string, songRequest: SongRequest)=>{
         await HistoryActionService.create(userId,"Thêm bài hát mới: "+song.id);
         return "Thêm thành công ";
     }catch(e){
-      throw new Error("Lỗi khi thêm nhạc: "+ e);
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi thêm nhạc: "+ e);
     }
 
 }
@@ -218,18 +218,18 @@ const updateSong = async (userId: string, songRequest: SongRequest,song_id: stri
     try{
         const song = await Song.findById(song_id)
         if(!song){
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy bài hát tương ứng: ");
         }
 
         const artist = await Artist.findById(songRequest.artist);
         if(!artist){
-            throw new Error("Tác giả không tồn tại")
+            throw new ApiError(StatusCodes.FORBIDDEN,"Tác giả không tồn tại")
         }
 
 
         const genre = await Topic.findById(songRequest.genre);
         if(!genre){
-            throw new Error("Không có thể loại tương ứng")
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không có thể loại tương ứng")
         }
 
         let content =`Đã thay đổi các thuộc tính của song ${song_id}:\n`;
@@ -294,7 +294,7 @@ const updateSong = async (userId: string, songRequest: SongRequest,song_id: stri
 
         return "update thành công"
     }catch(e){
-        throw new Error("Lỗi khi thay đổi thông tin: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi thay đổi thông tin: "+e);
     }
 }
 
@@ -302,14 +302,14 @@ const deletedsong = async(userId: string, song_id: string) => {
     try{
         const song = await Song.findById(song_id);
         if(!song){
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy bài hát tương ứng: ");
         }
         song.deleted = true;
         await song.save();
         await HistoryActionService.create(userId,"Đã xóa bài hát: "+song_id);
         return "Xóa thành công"
     }catch(e){
-        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi xóa bài nhạc: "+e);
     }
 }
 
@@ -317,13 +317,13 @@ const restoresong = async(song_id: string) => {
     try{
         const song = await Song.findById(song_id);
         if(!song){
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy bài hát tương ứng: ");
         }
         song.deleted = false;
         await song.save();
         return "Khôi phục thành công"
     }catch(e){
-        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi xóa bài nhạc: "+e);
     }
 }
 
