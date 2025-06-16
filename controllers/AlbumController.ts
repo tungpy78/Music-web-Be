@@ -7,7 +7,13 @@ import { AlbumUpdateRequest } from "../Request/AlbumUpdateRequest";
 const create = async(req: Request, res: Response, next: NextFunction) => {
     try{
         const userId = req.jwtDecoded.userInfo.userId;
-        const {album_name, decription, release_day,artist,songs } = req.body;
+        const {album_name, decription, release_day,artist,songs: rawSongs } = req.body;
+        const songsArray = Array.isArray(rawSongs)
+            ? rawSongs
+            : rawSongs
+            ? [rawSongs]
+            : [];
+
         const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
         };
@@ -16,7 +22,7 @@ const create = async(req: Request, res: Response, next: NextFunction) => {
             decription: decription,
             release_day: release_day,
             artist: artist,
-            songs: songs,
+            songs: songsArray,
             avatar : files.avatar[0].buffer
         };
         const result = await AlbumService.create(userId, albumRequest);

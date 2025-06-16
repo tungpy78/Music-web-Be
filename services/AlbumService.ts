@@ -22,12 +22,14 @@ const create = async(userId: string,albumRequest: AlbumRequest) => {
         });
         album.avatar = avatarUrl;
         album.artist = new mongoose.Types.ObjectId(albumRequest.artist);
-        for (let i = 0; i < albumRequest.songs.length; i++) {
-            const song  = await Song.findById(albumRequest.songs[i]);
-            if(!song){
-                throw new ApiError(StatusCodes.FORBIDDEN, "Không tìm thấy bài hát");
+        if (Array.isArray(albumRequest.songs)) {
+            for (let i = 0; i < albumRequest.songs.length; i++) {
+                const song = await Song.findById(albumRequest.songs[i]);
+                if (!song) {
+                    throw new ApiError(StatusCodes.FORBIDDEN, "Không tìm thấy bài hát"+ albumRequest.songs[i]);
+                }
+                album.songs.push(song._id);
             }
-            album.songs.push(song._id)
         }
         album.album_name = albumRequest.album_name;
         album.decription = albumRequest.decription;
