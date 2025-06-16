@@ -1,4 +1,6 @@
 import RoleModel from "../models/Role.model";
+import ApiError from "../Utils/AppError"
+import { StatusCodes } from "http-status-codes"
 
 const create = async(name:string) =>{
     try{
@@ -8,7 +10,7 @@ const create = async(name:string) =>{
         return "thêm thành công"
 
     }catch(e){
-        throw new Error("Lỗi khi thêm role: "+ e)
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi thêm role: "+ e)
     }
 }
 

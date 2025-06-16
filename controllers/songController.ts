@@ -99,14 +99,19 @@ const addNewSong = async (req:Request, res: Response, next:NextFunction) =>{
     try{
         const userData = req.jwtDecoded;
         const userId = userData?.userInfo?.userId;
-        const { title, artist, genre, description, lyrics } = req.body;
+        const { title, artist: rawArtist, genre, description, lyrics } = req.body;
+        const songsArray = Array.isArray(rawArtist)
+            ? rawArtist
+            : rawArtist
+            ? [rawArtist]
+            : [];
         const files = req.files as {
         [fieldname: string]: Express.Multer.File[];
         };
 
         const songRequest: SongRequest = {
         title,
-        artist,
+        artist: songsArray,
         genre,
         fileavatar: files.fileavatar[0].buffer,
         description,

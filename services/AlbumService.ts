@@ -6,7 +6,7 @@ import Cloudinary from "../Utils/Cloudinary";
 import Artist from "../models/Artist.model";
 import Song from "../models/Song.model";
 import { AlbumUpdateRequest } from "../Request/AlbumUpdateRequest";
-import ApiError from "../Utils/AppError";
+import ApiError from "../Utils/AppError"
 import { StatusCodes } from "http-status-codes"
 
 const create = async(userId: string,albumRequest: AlbumRequest) => {
@@ -14,7 +14,7 @@ const create = async(userId: string,albumRequest: AlbumRequest) => {
         const album = new Album()
         const artist = await Artist.findById(albumRequest.artist);
         if(!artist){
-            throw new Error("Tác giả không tồn tại")
+            throw new ApiError(StatusCodes.FORBIDDEN, "Không tìm thấy nghệ sĩ");
         }
         const avatarUrl = await Cloudinary.uploadToCloudinary(albumRequest.avatar, {
             resource_type: 'image',
@@ -22,12 +22,14 @@ const create = async(userId: string,albumRequest: AlbumRequest) => {
         });
         album.avatar = avatarUrl;
         album.artist = new mongoose.Types.ObjectId(albumRequest.artist);
-        for (let i = 0; i < albumRequest.songs.length; i++) {
-            const song  = await Song.findById(albumRequest.songs[i]);
-            if(!song){
-                throw new Error("Bài hát không tồn tại")
+        if (Array.isArray(albumRequest.songs)) {
+            for (let i = 0; i < albumRequest.songs.length; i++) {
+                const song = await Song.findById(albumRequest.songs[i]);
+                if (!song) {
+                    throw new ApiError(StatusCodes.FORBIDDEN, "Không tìm thấy bài hát"+ albumRequest.songs[i]);
+                }
+                album.songs.push(song._id);
             }
-            album.songs.push(song._id)
         }
         album.album_name = albumRequest.album_name;
         album.decription = albumRequest.decription;
@@ -36,14 +38,14 @@ const create = async(userId: string,albumRequest: AlbumRequest) => {
         await HistoryActionService.create(userId,"Đã thêm Album mới: "+ album.id);
         return "Thêm thành công"
     }catch(e){
-        throw new Error("Lỗi khi thêm Album: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi thêm Album: "+e);
     }
 }
 
 const getAlbum = async () => {
     const album = await Album.find();
     if(!album || album.length === 0 ){
-         throw new Error("No albums found.");
+         throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy album nào");
     }
     return album;
 }
@@ -52,7 +54,7 @@ const updateAlbum = async(albumUpdateRequest: AlbumUpdateRequest, album_id: stri
     try{
         const album = await Album.findById(album_id);
         if(!album){
-            throw new Error("Không tìm thấy Album tương ứng: "+ album_id);
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy Album tương ứng: "+ album_id);
         }
         let content =`Đã thay đổi các thuộc tính của Album ${album_id}:\n`;
         let hasChanges = false;
@@ -69,7 +71,7 @@ const updateAlbum = async(albumUpdateRequest: AlbumUpdateRequest, album_id: stri
         
         const artist = await Artist.findById(albumUpdateRequest.artist);
         if(!artist){
-            throw new Error("Tác giả không tồn tại")
+            throw new ApiError(StatusCodes.FORBIDDEN,"Tác giả không tồn tại")
         }
 
         const newArtistId = new mongoose.Types.ObjectId(albumUpdateRequest.artist);
@@ -100,7 +102,7 @@ const updateAlbum = async(albumUpdateRequest: AlbumUpdateRequest, album_id: stri
         }
         return "update thành công"
     }catch( e){
-        throw new Error("Lỗi khi sửa album: "+ e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi sửa album: "+ e);
     }
 }
 
@@ -108,14 +110,14 @@ const addSongToAlbum = async( song_id: string,album_id: string, userId: string) 
     try {
         const album = await Album.findById(album_id);
         if (!album) {
-            throw new Error("Không tìm thấy album.");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy album.");
         }
         const song = await Song.findById(song_id);
         if (!song) {
-            throw new Error("Không tìm thấy song.");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy song.");
         }
         if (album.songs.includes(song._id)) {
-            throw new Error("Bài hát đã tồn tại trong album.");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Bài hát đã tồn tại trong album.");
         }
 
         album.songs.push(song._id);
@@ -125,7 +127,7 @@ const addSongToAlbum = async( song_id: string,album_id: string, userId: string) 
         return "Đã thêm bài hát vào album thành công.";
 
     }catch(e){
-        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi xóa bài nhạc: "+e);
     }
 }
 
@@ -133,17 +135,17 @@ const removeSongFromAlbum = async (song_id: string, album_id: string, userId: st
   try {
     const album = await Album.findById(album_id);
     if (!album) {
-      throw new Error("Không tìm thấy album.");
+      throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy album.");
     }
 
     const song = await Song.findById(song_id);
     if (!song) {
-      throw new Error("Không tìm thấy bài hát.");
+      throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy bài hát.");
     }
 
     const songIndex = album.songs.indexOf(song._id);
     if (songIndex === -1) {
-      throw new Error("Bài hát không tồn tại trong album.");
+      throw new ApiError(StatusCodes.FORBIDDEN,"Bài hát không tồn tại trong album.");
     }
     album.songs.splice(songIndex, 1);
     await album.save();
@@ -151,7 +153,7 @@ const removeSongFromAlbum = async (song_id: string, album_id: string, userId: st
     return "Đã xóa bài hát khỏi album thành công." ;
     
   } catch (e: any) {
-    throw new Error("Lỗi khi xóa bài nhạc: " + e.message);
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi xóa bài nhạc: " + e.message);
   }
 };
 
@@ -159,12 +161,12 @@ const deletedAlbum = async(album_id: string, userId: string) => {
     try{
         const deleted = await Album.findByIdAndDelete(album_id);
         if (!deleted) {
-            throw new Error("Không tìm thấy album để xóa.");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy album để xóa.");
         }
         await HistoryActionService.create(userId, "Đã xóa album: " + album_id);
         return "Xóa thành công";
         }catch(e){
-            throw new Error("Lỗi khi xóa bài nhạc: "+e);
+            throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi xóa bài nhạc: "+e);
         }
 }
 const getAllAlbumservice = async () => {

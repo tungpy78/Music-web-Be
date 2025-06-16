@@ -64,7 +64,7 @@ const create = async(userId: string, topicRequset: TopicRuquest) => {
         await HistoryActionService.create(userId, "Thêm topic mới: "+ topic.id);
         return "thêm topic thành công"
     }catch(e){
-        throw new Error("Lôi khi thêm thể loại: "+ e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lôi khi thêm thể loại: "+ e);
     }
 }
 
@@ -72,7 +72,7 @@ const updateTopic = async(userId: string , topicRequset: TopicRuquest,topicId : 
     try{
         const topic = await Topic.findById(topicId);
         if( !topic){
-            throw new Error ("Không tìm thấy topic tương ứng");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy topic tương ứng");
         }
         let content = `Đã thay đổi các thuộc tính của topic ${topicId}:\n`;
 ;
@@ -107,7 +107,7 @@ const updateTopic = async(userId: string , topicRequset: TopicRuquest,topicId : 
         }
         return "update thành công"
     }catch(e){
-        throw new Error("Lỗi khi sửa topic: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi sửa topic: "+e);
     }
 }
 
@@ -115,14 +115,14 @@ const deletedtopic = async(userId: string, topicId: string) => {
     try{
         const topic = await Topic.findById(topicId);
         if(!topic){
-            throw new Error("Không tìm thấy thể loại tương ứng: ");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy thể loại tương ứng: ");
         }
         topic.deleted = true;
         await topic.save();
         await HistoryActionService.create(userId,"Đã xóa topic: "+topicId);
         return "Xóa thành công"
     }catch(e){
-        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi xóa bài nhạc: "+e);
     }
 }
 
@@ -130,13 +130,13 @@ const restoretopic = async(topicId: string) => {
     try{
         const topic = await Topic.findById(topicId);
         if(!topic){
-            throw new Error("Không tìm thấy thể loại tương ứng: ");
+            throw new ApiError(StatusCodes.FORBIDDEN,"Không tìm thấy thể loại tương ứng: ");
         }
         topic.deleted = false;
         await topic.save();
         return "Khôi phục thành công"
     }catch(e){
-        throw new Error("Lỗi khi xóa bài nhạc: "+e);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi xóa bài nhạc: "+e);
     }
 }
 
