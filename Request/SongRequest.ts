@@ -4,6 +4,6 @@ export interface  SongRequest {
     description: string,
     lyrics: string,
     fileaudio: Buffer,
-    artist: string,
+    artist: string[],
     genre: string
 }

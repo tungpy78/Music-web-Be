@@ -48,9 +48,9 @@ const createSong = [
     .isString().withMessage("Lời bài hát phải là chuỗi"),
 
   body("artist")
-    .isMongoId().withMessage("artist ID không hợp lệ")
-    .notEmpty().withMessage("Nghệ sĩ không được để trống")
-    .isString().withMessage("Nghệ sĩ phải là chuỗi"),
+    .isArray({ min: 1 }).withMessage("Danh sách nghệ sĩ không được để trống"),
+  body("artist.*")
+    .isMongoId().withMessage("Mỗi ID nghệ sĩ phải là MongoId hợp lệ"),
 
   body("genre")
     .isMongoId().withMessage("Genre ID không hợp lệ")
@@ -89,9 +89,9 @@ const updateSong = [
     .isString().withMessage("Lời bài hát phải là chuỗi"),
 
   body("artist")
-    .isMongoId().withMessage("artist ID không hợp lệ")
-    .notEmpty().withMessage("Nghệ sĩ không được để trống")
-    .isString().withMessage("Nghệ sĩ phải là chuỗi"),
+    .isArray({ min: 1 }).withMessage("Danh sách nghệ sĩ không được để trống"),
+  body("artist.*")
+    .isMongoId().withMessage("Mỗi ID nghệ sĩ phải là MongoId hợp lệ"),
 
   body("genre")
     .isMongoId().withMessage("Genre ID không hợp lệ")

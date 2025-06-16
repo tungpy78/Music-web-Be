@@ -188,9 +188,14 @@ const addNewSong = async(userId: string, songRequest: SongRequest)=>{
         resource_type: 'image',
         folder: 'songs/avatar',
         });
-        const artist = await Artist.findById(songRequest.artist);
-        if(!artist){
-            throw new ApiError(StatusCodes.FORBIDDEN,"Tác giả không tồn tại")
+
+        const artistIds: mongoose.Types.ObjectId[] = [];
+        for (const artistId of songRequest.artist) {
+            const artist = await Artist.findById(artistId);
+            if (!artist) {
+                throw new ApiError(StatusCodes.FORBIDDEN, `Tác giả không tồn tại: ${artistId}`);
+            }
+        artistIds.push(new mongoose.Types.ObjectId(artistId));
         }
         const genre = await Topic.findById(songRequest.genre);
         if(!genre){
@@ -199,7 +204,7 @@ const addNewSong = async(userId: string, songRequest: SongRequest)=>{
         const song = new Song();
         Object.assign(song, {
             ...songRequest,
-            artist: new mongoose.Types.ObjectId(songRequest.artist),
+            artist: artistIds,
             genre: new mongoose.Types.ObjectId(songRequest.genre),
             audio: audioUrl,
             avatar: avatarUrl
@@ -273,10 +278,24 @@ const updateSong = async (userId: string, songRequest: SongRequest,song_id: stri
             hasChanges = true;
         }
 
-        const newArtistId = new mongoose.Types.ObjectId(songRequest.artist);
-        if (song.artist.toString() !== newArtistId.toString()) {
-            content += `- Tác giả: ${song.artist} -> ${newArtistId}\n`;
-            song.artist = newArtistId;
+        const newArtistIds: mongoose.Types.ObjectId[] = [];
+        for (const artistId of songRequest.artist) {
+            const artist = await Artist.findById(artistId);
+            if (!artist) {
+                throw new ApiError(StatusCodes.FORBIDDEN, `Tác giả không tồn tại: ${artistId}`);
+            }
+            newArtistIds.push(new mongoose.Types.ObjectId(artistId));
+        }
+        const oldArtistIds = song.artist.map((id: mongoose.Types.ObjectId) => id.toString());
+        const newArtistIdsStr = newArtistIds.map(id => id.toString());
+
+        const isDifferent =
+            oldArtistIds.length !== newArtistIdsStr.length ||
+            !oldArtistIds.every(id => newArtistIdsStr.includes(id));
+
+        if (isDifferent) {
+            content += `- Tác giả: [${oldArtistIds.join(', ')}] -> [${newArtistIdsStr.join(', ')}]\n`;
+            song.artist = newArtistIds;
             hasChanges = true;
         }
 

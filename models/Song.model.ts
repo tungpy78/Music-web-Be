@@ -3,7 +3,7 @@ import "./Artist.model";
 
 const SongSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    artist: { type: mongoose.Schema.Types.ObjectId, ref: 'Artist', required: true },
+    artist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Artist', required: true }],
     genre: { type: mongoose.Schema.Types.ObjectId, ref: 'Topic', required: true },
     avatar: { type: String, required: true },
     audio: String,
