@@ -181,6 +181,11 @@ const getAlbumByIdService = async (albumId: string) => {
             path: 'songs',
             model: 'Song',
             select: 'audio avatar title',
+            populate: {
+                path: 'artist',
+                model: 'Artist', // hoặc model tương ứng của bạn
+                select: 'name',   // chỉ lấy tên artist
+            },
         });
 
     if (!albums) {
