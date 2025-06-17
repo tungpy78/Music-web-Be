@@ -46,6 +46,7 @@ const getSongService = async (songId: string, userId: string) => {
         allPlayList
     }
 }
+
 const getAllSongsService = async (userId: string) => {
   const songs = await Song.find({ deleted: false }).sort({ like: -1 })
     .populate("artist")
@@ -350,6 +351,13 @@ const restoresong = async(song_id: string) => {
     }
 }
 
+const getAllSongAdmin = async () => {
+  const songs = await Song.find()
+    .populate("artist")
+    .populate("genre");
+  return songs;
+}
+
 export const SongService = {
     getSongService,
     getAllSongsService,
@@ -362,6 +370,7 @@ export const SongService = {
     searchSongService,
     updateSong,
     deletedsong,
-    restoresong
+    restoresong,
+    getAllSongAdmin
 
 }
