@@ -109,6 +109,9 @@ const toggleFavoriteService = async (songId: string, userId: string) => {
     }
 }
 const addSongIntoPlayListService = async (songId: string, userId: string, playListId: string) => {
+    if(!playListId){
+        throw new ApiError(StatusCodes.NOT_FOUND, "Phải chọn PlayList");
+    }
     const existingPlaylist = await Playlist.findOne({
         _id: new mongoose.Types.ObjectId(playListId),
         userId: new mongoose.Types.ObjectId(userId),
@@ -120,6 +123,7 @@ const addSongIntoPlayListService = async (songId: string, userId: string, playLi
             message: "Bài hát đã tồn tại trong PlayList."
         };
     }
+
 
     const addSongPlayList = await Playlist.updateOne(
         {

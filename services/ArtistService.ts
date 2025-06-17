@@ -1,4 +1,6 @@
+import Album from "../models/Album.model";
 import Artist from "../models/Artist.model";
+import Song from "../models/Song.model";
 import { AritistRequest } from "../Request/ArtistRequest"
 import ApiError from "../Utils/AppError";
 import Cloudinary from "../Utils/Cloudinary";
@@ -70,15 +72,25 @@ const updateArtist = async(userId: string, aritistRequest: AritistRequest, ariti
     }
 }
 const getArtistByIdService = async (artistId: string) => {
-    const artist = await Artist.findById(artistId).populate('songs').populate('albums');
+    const artist = await Artist.findById(artistId);
     if (!artist) {
         throw new ApiError(404, "Không tìm thấy tác giả yêu cầu");
     }
-    return artist;
+
+    // Lấy danh sách bài hát và album của artist
+    const songs = await Song.find({ artist: artistId, deleted: false }).select('title avatar').populate('artist', 'name');
+    const albums = await Album.find({ artist: artistId });
+
+    return {
+        ...artist.toObject(),
+        songs,
+        albums,
+    };
 };
+
 export const ArtistService = {
     create,
     getAllArtist,
     updateArtist,
-    getArtistByIdService 
-}
+    getArtistByIdService
+};
