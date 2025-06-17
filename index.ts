@@ -18,8 +18,9 @@ app.use(cors());
 app.use(express.json());    
 
 // ClientRouter
-clientRoutes(app);
 adminRoutes(app);
+clientRoutes(app);
+
 
 // Middleware xử lý lỗi tập trung trong ứng dụng Back-end NodeJS (ExpressJS)
 app.use(errorHandlingMiddleware);

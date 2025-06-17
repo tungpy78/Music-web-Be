@@ -40,6 +40,15 @@ const getAlbum = async (req: Request, res: Response, next: NextFunction) => {
             next(e);
         }
 }
+const getAlbumForAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+            const result = await AlbumService.getAlbumForAdmin();
+            res.status(StatusCodes.OK).json(result)
+        }catch(e){
+            next(e);
+        }
+}
+
 
 const updateAlbum = async(req: Request, res: Response, next: NextFunction) => {
     try{
@@ -54,7 +63,7 @@ const updateAlbum = async(req: Request, res: Response, next: NextFunction) => {
             decription: decription,
             release_day: release_day,
             artist: artist,
-            avatar : files.avatar[0].buffer
+            avatar : files?.avatar?.[0]?.buffer
         };
         const result = await AlbumService.updateAlbum( albumUpdateRequest,album_id, userId);
         res.status(StatusCodes.OK).json(result);
@@ -79,16 +88,6 @@ const addSongToAlbum = async(req: Request, res: Response, next: NextFunction) =>
         const userId = req.jwtDecoded.userInfo.userId;
         const {song_id, album_id} = req.body
         const result = await AlbumService.addSongToAlbum(song_id,album_id, userId);
-        res.status(StatusCodes.OK).json(result);
-    }catch(e){
-        next(e)
-    }
-}
-const removeSongFromAlbum = async(req: Request, res: Response, next: NextFunction) => {
-    try{
-        const userId = req.jwtDecoded.userInfo.userId;
-        const {song_id, album_id} = req.body
-        const result = await AlbumService.removeSongFromAlbum(song_id,album_id, userId);
         res.status(StatusCodes.OK).json(result);
     }catch(e){
         next(e)
@@ -119,7 +118,7 @@ export const AlbumController = {
     updateAlbum,
     deletedAlbum,
     addSongToAlbum,
-    removeSongFromAlbum,
     getAlbumById,
-    getAllAlbum
+    getAllAlbum,
+    getAlbumForAdmin
 }
