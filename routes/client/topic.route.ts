@@ -9,7 +9,6 @@ const router: Router = Router();
 
 
 router.get('/', TopicController.getTopics);
-router.get('/adminTopics', TopicController.getTopicsForAdmin);
 router.get('/:topicId',topicValidators.getTopicById ,TopicController.getTopicById);
 
 
