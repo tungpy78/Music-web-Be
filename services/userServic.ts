@@ -48,15 +48,15 @@ const loginService = async (phone: string, password: string) => {
     const accessToken = await JwtProvider.generateToken(
         payload,
         process.env.ACCESS_TOKEN_SECRET_SIGNATURE as string,
-        // "5 s"
-        "1h"
+        "5 s"
+        // "1h"
     )
 
     const refreshToken = await JwtProvider.generateToken(
         payload,
         process.env.REFRESH_TOKEN_SECRET_SIGNATURE as string,
-        // "15 s"
-        "14 days"
+        "15 s"
+        // "14 days"
     )
 
     return {

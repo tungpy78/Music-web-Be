@@ -10,4 +10,5 @@ router.post('/create',upload.fields([{ name: 'fileAvata', maxCount: 1 }]),topicV
 router.patch('/update/:topicId',upload.fields([{ name: 'fileAvata', maxCount: 1 }]),topicValidators.updateTopic,AuthMiddleware.validateRequest,TopicController.updateTopic)
 router.patch('/delete/:topicId',topicValidators.deletedtopic,AuthMiddleware.validateRequest,TopicController.deletedtopic);
 router.patch('/restore/:topicId',topicValidators.deletedtopic,AuthMiddleware.validateRequest,TopicController.restoretopic);
+router.get('/adminTopics', TopicController.getTopicsForAdmin);
 export const TopicRouter: Router =  router;

@@ -69,7 +69,7 @@ const isManager = async (req: Request, res: Response, next: NextFunction) => {
       if (userData?.userInfo?.role === "Admin"||userData?.userInfo?.role === "Manager") {
         next();
       } else {
-        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an Manager." + JSON.stringify(userData),});
+        res.status(StatusCodes.UNAUTHORIZED).json({message: "Forbidden: You are not an Manager." + JSON.stringify(userData)});
         return;
       }
     });
