@@ -19,5 +19,7 @@ router.patch('/setpassdefault/:account_id',AuthMiddleware.isAdmin,AuthController
 
 router.patch('/setpass',AuthMiddleware.isAuthorized,AuthController.setpassword)
 
+router.get(`/getAllAccount`,AuthMiddleware.isManager, AuthController.getAllAccount)
+
 router.get('/getaccount',AuthMiddleware.isAdmin,AuthController.getAccount);
 export const UserRouter: Router = router;

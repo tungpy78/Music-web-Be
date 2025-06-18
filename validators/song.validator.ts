@@ -9,6 +9,11 @@ const searchSongValidator = [
     .notEmpty().withMessage("Keyword không được để trống")
     .isString().withMessage("Keyword phải là một chuỗi"),
 ]
+const getSongsByArtistValidator = [
+    param("artist_id")
+    .notEmpty().withMessage("Artist ID không được để trống")
+    .isMongoId().withMessage("Artist ID không hợp lệ"),
+]
 const toggleFavoriteValidator = [
     param("songid")
     .notEmpty().withMessage("Song ID không được để trống")
@@ -112,6 +117,7 @@ const deletedSong = [
 export const songValidators = {
     getSongValidator,
     searchSongValidator,
+    getSongsByArtistValidator,
     toggleFavoriteValidator,
     addSongIntoPlayListValidator,
     createPlayListValidator,
