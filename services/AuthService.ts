@@ -143,6 +143,10 @@ const setStatus = async(account_id:string)=>{
         throw new ApiError(StatusCodes.FORBIDDEN,"Lỗi khi xét status: "+ e);
     }
 }
+const getAllAccountService = async () => {
+    const getAccount = await Account.find({role_id:"681b1c1327419f6f6416e116"});
+    return getAccount;
+}
 export const AuthService ={
     createAccount,
     setRole,
@@ -151,5 +155,6 @@ export const AuthService ={
     setpassword,
     setPassDefault,
     getAccount,
-    setStatus
+    setStatus,
+    getAllAccountService
 }

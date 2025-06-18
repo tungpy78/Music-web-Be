@@ -86,6 +86,14 @@ const setStatus = async(req: Request, res: Response, next: NextFunction) => {
         next(e);
     }
 }
+const getAllAccount = async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await AuthService.getAllAccountService();
+        res.status(StatusCodes.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+}
 export const AuthController = {
     createAccount,
     setRole,
@@ -94,5 +102,6 @@ export const AuthController = {
     setpassword,
     setPassDefault,
     getAccount,
-    setStatus
+    setStatus,
+    getAllAccount
 }
