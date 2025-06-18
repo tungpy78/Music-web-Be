@@ -8,7 +8,7 @@ const getSongs = async (req:Request, res:Response, next:NextFunction) => {
         const { songid } = req.params;
         const userId = req.jwtDecoded.userInfo.userId;
         
-        const response = await SongService.getSongService(songid,userId ?? "");
+        const response = await SongService.getSongService(songid,userId);
 
         res.status(StatusCodes.OK).json(response);
     } catch (error) {
@@ -62,7 +62,7 @@ const addSongIntoPlayList = async (req:Request, res:Response, next:NextFunction)
     try {
         const {songid} = req.params;
         const userId = req.jwtDecoded.userInfo.userId;
-        const playListId = req.body.playListId
+        const playListId = req.body.playListId;
 
         const result = await SongService.addSongIntoPlayListService(songid,userId,playListId)
         res.status(StatusCodes.OK).json(result)

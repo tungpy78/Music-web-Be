@@ -31,8 +31,6 @@ router.patch('/setrole',AuthMiddleware.isAdmin, AuthController.setRole);
 
 router.get('/getrole',AuthController.getRole);
 
-router.get(`/getAllAccount`,AuthMiddleware.isManager, AuthController.getAllAccount)
-
 router.patch('/setDelete/:account_id',AuthMiddleware.isAdmin, AuthController.setDelete)
 
 router.patch('/setpassdefault/:account_id',AuthMiddleware.isAdmin,AuthController.setPassDefault);

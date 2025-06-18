@@ -28,16 +28,12 @@ const getTopicsForAdmin = async () => {
 
 const getTopicByIdService = async (topicId: string) => {
 
- 
-     // Chuyển sang ObjectId
-     const topicObjectId = new mongoose.Types.ObjectId(topicId);
-
      const songs = await Song.find({
-         genre: topicObjectId,
+         genre: topicId,
          deleted: false
      }).populate('artist', 'name').populate('genre', 'title')
 
-     const nameTopic = await Topic.findById(topicObjectId).select('title').lean();
+     const nameTopic = await Topic.findById(topicId).select('title').lean();
     
      
     if (!songs) {
