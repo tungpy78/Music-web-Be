@@ -162,7 +162,7 @@ const createPlayListService = async (songId: string, userId: string, name: strin
         }
     )
     
-    return createPlayList
+    return createPlayList;
 }
 const addHistoryService = async(songId:string, userId:string)=> {
     const existing = await History.findOne({songId:songId, userId: userId})

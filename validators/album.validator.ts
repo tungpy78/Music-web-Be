@@ -35,9 +35,15 @@ const addSongToAlbum = [
     .isMongoId().withMessage("Album ID không hợp lệ")
     .notEmpty().withMessage("Album id ko được để trống"),
 ]
+const getAlbumByIdValidator = [
+    param("albumId")
+    .isMongoId().withMessage("Album ID không hợp lệ")
+    .notEmpty().withMessage("Album id không được để trống"),
+]
 export const AlbumValidators = {
     createAlbumValidator,
     updateAlbum,
     deletedAlbum,
-    addSongToAlbum
+    addSongToAlbum,
+    getAlbumByIdValidator
 }

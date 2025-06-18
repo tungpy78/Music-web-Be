@@ -21,7 +21,7 @@ router.post("/:songid/favorite", songValidators.toggleFavoriteValidator,AuthMidd
 
 router.post("/:songid/playList", songValidators.addSongIntoPlayListValidator,AuthMiddleware.validateRequest, SongController.addSongIntoPlayList)
 
-router.post("/:songid/createPlaylist", songValidators.createPlayListValidator, SongController.createPlayList)
-router.post("/:songid/addHistory", songValidators.addHistorySongValidator, SongController.addHistorySong)
+router.post("/:songid/createPlaylist", songValidators.createPlayListValidator,AuthMiddleware.validateRequest, SongController.createPlayList)
+router.post("/:songid/addHistory", songValidators.addHistorySongValidator, AuthMiddleware.validateRequest, SongController.addHistorySong)
 
 export const songRoutes: Router = router;

@@ -9,7 +9,7 @@ const getHistoryService = async (userId: string) => {
     .populate({
         path: 'songId',
         populate: {
-            path: 'artist', // <-- Lấy thêm artist trong song
+            path: 'artist', // <-- Lấy thêm artist trong song   
         }
     });
     if(!history){

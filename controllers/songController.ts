@@ -74,7 +74,7 @@ const createPlayList = async (req: Request, res: Response, next: NextFunction) =
     try {
         const {songid} = req.params;
         const userId = req.jwtDecoded.userInfo.userId;
-        const name = req.body.name
+        const name = req.body.name;
 
         const result = await SongService.createPlayListService(songid,userId,name)
         res.status(StatusCodes.OK).json(result)
@@ -88,8 +88,10 @@ const addHistorySong = async (req:Request, res: Response, next:NextFunction) => 
         
         const userId = req.jwtDecoded.userInfo.userId;
 
-        const result = await SongService.addHistoryService(songid,userId)
-        res.status(StatusCodes.OK).json(result)
+        const result = await SongService.addHistoryService(songid,userId);
+        
+        res.status(StatusCodes.OK).json(result);
+
     } catch (error) {
         next(error)
     }

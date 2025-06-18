@@ -12,7 +12,7 @@ const getPlayListService = async (userId: string) => {
     return playlist
 }
 const getPlayListByIdService = async (playlistId: String, userId: string) => {
-    const playlistdetail = await Playlist.findById(playlistId, { userId: userId })
+    const playlistdetail = await Playlist.findOne({ _id: playlistId, userId: userId })
         .populate({
             path: 'songs.songId',
             populate: {

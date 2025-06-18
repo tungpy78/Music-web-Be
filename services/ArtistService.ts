@@ -73,6 +73,7 @@ const updateArtist = async(userId: string, aritistRequest: AritistRequest, ariti
 }
 const getArtistByIdService = async (artistId: string) => {
     const artist = await Artist.findById(artistId);
+    
     if (!artist) {
         throw new ApiError(404, "Không tìm thấy tác giả yêu cầu");
     }

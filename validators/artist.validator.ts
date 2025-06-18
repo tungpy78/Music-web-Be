@@ -20,11 +20,17 @@ const updateArtist = [
     .notEmpty().withMessage("Tên nghệ sĩ không được để trống")
     .isString().withMessage("Tên nghệ sĩ phải là chuỗi"),
     param("artist_id")
-        .isMongoId().withMessage("Artist ID không hợp lệ")
-        .notEmpty().withMessage("Artist ID không được để trống")
+      .isMongoId().withMessage("Artist ID không hợp lệ")
+      .notEmpty().withMessage("Artist ID không được để trống")
+]
+const getArtistByIdValidator = [
+  param("artistId")
+  .isMongoId().withMessage("Artist ID không hợp lệ")
+  .notEmpty().withMessage("Artist ID không được để trống")
 ]
 
 export const ArtistValidator ={
     createArtist,
-    updateArtist
+    updateArtist,
+    getArtistByIdValidator
 }
