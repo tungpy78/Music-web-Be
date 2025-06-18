@@ -17,21 +17,28 @@ const create = async (userId: string, content: string) =>{
 const getHistoryAction = async () => {
   try {
     const history = await HistoryAction.find()
+      .sort({ listenedAt: -1 }) // 🔥 Sắp xếp theo thời gian mới nhất
       .populate({
         path: "userId",
-        select: "fullname"
+        select: "fullname account_id",
+        populate: {
+          path: "account_id",
+          select: "phone"
+        }
       })
-      .select("content userId")
+      .select("content userId listenedAt")
       .lean();
 
     return history.map(item => ({
       _id: item._id,
       content: item.content,
       user: (item.userId as any)?.fullname || "Người dùng không xác định",
+      phone: (item.userId as any)?.account_id?.phone || "Không có số điện thoại",
+      listenedAt: item.listenedAt
     }));
 
   } catch (e) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi thêm thay đổi: " + e);
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi lấy lịch sử: " + e);
   }
 };
 export const HistoryActionService = {

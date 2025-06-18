@@ -6,6 +6,7 @@ import { AuthMiddleware } from "../../middlewares/authMiddleware";
 
 const router: Router = Router();
 
+router.get('/adminTopics', TopicController.getTopicsForAdmin);
 router.post('/create',upload.fields([{ name: 'fileAvata', maxCount: 1 }]),topicValidators.createTopic,AuthMiddleware.validateRequest,TopicController.create)
 router.patch('/update/:topicId',upload.fields([{ name: 'fileAvata', maxCount: 1 }]),topicValidators.updateTopic,AuthMiddleware.validateRequest,TopicController.updateTopic)
 router.patch('/delete/:topicId',topicValidators.deletedtopic,AuthMiddleware.validateRequest,TopicController.deletedtopic);
