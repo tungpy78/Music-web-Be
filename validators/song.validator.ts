@@ -46,7 +46,8 @@ const createSong = [
     .notEmpty().withMessage("Tiêu đề bài hát không được để trống")
     .optional()
     .isString().withMessage("Lời bài hát phải là chuỗi"),
-
+    
+  body("artist").customSanitizer(value => Array.isArray(value) ? value : [value]),
   body("artist")
     .isArray({ min: 1 }).withMessage("Danh sách nghệ sĩ không được để trống"),
   body("artist.*")
@@ -88,6 +89,7 @@ const updateSong = [
     .optional()
     .isString().withMessage("Lời bài hát phải là chuỗi"),
 
+  body("artist").customSanitizer(value => Array.isArray(value) ? value : [value]),
   body("artist")
     .isArray({ min: 1 }).withMessage("Danh sách nghệ sĩ không được để trống"),
   body("artist.*")

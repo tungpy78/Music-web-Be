@@ -23,4 +23,5 @@ router.patch('/update/:song_id', upload.fields([
 router.patch('/delete/:song_id',songValidators.deletedSong,AuthMiddleware.validateRequest,SongController.deletedSong);
 
 router.patch('/restore/:song_id',songValidators.deletedSong,AuthMiddleware.validateRequest,SongController.restoreSong);
+router.get('/getAllAdmin',SongController.getAllSongAdmin)
 export const SongRoutes: Router = router;

@@ -171,6 +171,15 @@ const restoreSong = async (req:Request, res: Response, next:NextFunction) => {
     }
 }
 
+const getAllSongAdmin = async (req:Request, res: Response, next:NextFunction) => {
+    try{
+        const result = await SongService.getAllSongAdmin();
+        res.status(StatusCodes.OK).json(result)
+    }catch(e){
+        next(e);
+    }
+}
+
 export const SongController = {
     getSongs,
     getAllSongs,
@@ -183,5 +192,6 @@ export const SongController = {
     updateSong,
     deletedSong,
     restoreSong,
-    searchSong
+    searchSong,
+    getAllSongAdmin
 }

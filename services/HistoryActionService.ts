@@ -14,7 +14,27 @@ const create = async (userId: string, content: string) =>{
         throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR,"Lỗi khi thêm thay đổi: "+ e);
     }
 }
+const getHistoryAction = async () => {
+  try {
+    const history = await HistoryAction.find()
+      .populate({
+        path: "userId",
+        select: "fullname"
+      })
+      .select("content userId")
+      .lean();
 
+    return history.map(item => ({
+      _id: item._id,
+      content: item.content,
+      user: (item.userId as any)?.fullname || "Người dùng không xác định",
+    }));
+
+  } catch (e) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi thêm thay đổi: " + e);
+  }
+};
 export const HistoryActionService = {
-    create
+    create,
+    getHistoryAction
 }
