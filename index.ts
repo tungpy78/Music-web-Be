@@ -25,8 +25,6 @@ clientRoutes(app);
 // Middleware xử lý lỗi tập trung trong ứng dụng Back-end NodeJS (ExpressJS)
 app.use(errorHandlingMiddleware);
 
-// Middleware xử lý lỗi tập trung trong ứng dụng Back-end NodeJS (ExpressJS)
-app.use(errorHandlingMiddleware);
 
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);
