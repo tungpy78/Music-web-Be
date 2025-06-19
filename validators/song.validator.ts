@@ -20,7 +20,7 @@ const toggleFavoriteValidator = [
     .isMongoId().withMessage("Song ID không hợp lệ"),
 ]
 const addSongIntoPlayListValidator = [
-    param("songId")
+    param("songid")
     .notEmpty().withMessage("Song ID không được để trống1")
     .isMongoId().withMessage("Song ID không hợp lệ1"),
     body("playListId")

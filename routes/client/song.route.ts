@@ -19,7 +19,7 @@ router.get("/", SongController.getAllSongs)
 
 router.post("/:songid/favorite", songValidators.toggleFavoriteValidator,AuthMiddleware.validateRequest, SongController.toggleFavorite)
 
-router.post("/:songid/playList",  SongController.addSongIntoPlayList)
+router.post("/:songid/playList", songValidators.addSongIntoPlayListValidator,AuthMiddleware.validateRequest, SongController.addSongIntoPlayList)
 
 router.post("/:songid/createPlaylist", songValidators.createPlayListValidator,AuthMiddleware.validateRequest, SongController.createPlayList)
 router.post("/:songid/addHistory", songValidators.addHistorySongValidator, AuthMiddleware.validateRequest, SongController.addHistorySong)
