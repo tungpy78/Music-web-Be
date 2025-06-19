@@ -110,47 +110,42 @@ const toggleFavoriteService = async (songId: string, userId: string) => {
     }
 }
 const addSongIntoPlayListService = async (songId: string, userId: string, playListId: string) => {
-    if(!playListId){
+    if (!playListId) {
         throw new ApiError(StatusCodes.NOT_FOUND, "Phải chọn PlayList");
     }
+
+    // Tìm playlist của user
+    const playlist = await Playlist.findOne({
+        _id: new mongoose.Types.ObjectId(playListId),
+        userId: new mongoose.Types.ObjectId(userId),
+    });
+
+    if (!playlist) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Playlist không tồn tại.");
+    }
+
+    // Kiểm tra quá 20 bài
     if (playlist.songs.length >= 20) {
         throw new ApiError(StatusCodes.BAD_REQUEST, "Playlist đã đạt tối đa 20 bài hát.");
     }
-    const existingPlaylist = await Playlist.findOne({
-        _id: new mongoose.Types.ObjectId(playListId),
-        userId: new mongoose.Types.ObjectId(userId),
-        'songs.songId': new mongoose.Types.ObjectId(songId)
-    });
 
-    if (existingPlaylist) {
+    // Kiểm tra bài hát đã tồn tại chưa
+    const isExisted = playlist.songs.some(song => song.songId?.toString() === songId);
+    if (isExisted) {
         return {
             message: "Bài hát đã tồn tại trong PlayList."
         };
     }
 
+    // Thêm bài
+    playlist.songs.push({ songId: new mongoose.Types.ObjectId(songId) });
+    await playlist.save();
 
-    const addSongPlayList = await Playlist.updateOne(
-        {
-            _id: new mongoose.Types.ObjectId(playListId),
-            userId: new mongoose.Types.ObjectId(userId),
-            'songs.songId': { $ne: new mongoose.Types.ObjectId(songId) }
-          },
-          {
-            $push: {
-              songs: { songId: new mongoose.Types.ObjectId(songId) }
-            }
-          }
-    )
-    if (addSongPlayList.modifiedCount > 0) {
-        return {
-          message: "Thêm vào PlayList thành công."
-        };
-      } else {
-        return {
-          message: "Bài hát đã tồn tại hoặc playlist không tồn tại."
-        };
-      }
-}
+    return {
+        message: "Thêm vào PlayList thành công."
+    };
+};
+
 const createPlayListService = async (songId: string, userId: string, name: string) => {
     const existingPlaylist = await Playlist.findOne({ name, userId });
 
