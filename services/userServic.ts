@@ -187,7 +187,7 @@ const sendOtpService = async (email: string) => {
 
     // Generate OTP
     const otp = generateOTP();
-    const expireSeconds = 15; // 5 phút
+    const expireSeconds = 180; // 5 phút
 
     await RedisService.saveOTP(email, otp, expireSeconds);
 
