@@ -113,6 +113,9 @@ const addSongIntoPlayListService = async (songId: string, userId: string, playLi
     if(!playListId){
         throw new ApiError(StatusCodes.NOT_FOUND, "Phải chọn PlayList");
     }
+    if (playlist.songs.length >= 20) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Playlist đã đạt tối đa 20 bài hát.");
+    }
     const existingPlaylist = await Playlist.findOne({
         _id: new mongoose.Types.ObjectId(playListId),
         userId: new mongoose.Types.ObjectId(userId),
