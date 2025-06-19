@@ -64,6 +64,7 @@ const addSongIntoPlayList = async (req:Request, res:Response, next:NextFunction)
         const userId = req.jwtDecoded.userInfo.userId;
         const playListId = req.body.playListId;
         console.log("playlistid",playListId);
+        console.log("songId", songId);
 
         const result = await SongService.addSongIntoPlayListService(songId,userId,playListId)
         res.status(StatusCodes.OK).json(result)
