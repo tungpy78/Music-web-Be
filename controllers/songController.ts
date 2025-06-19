@@ -60,12 +60,12 @@ const toggleFavorite = async (req:Request, res:Response, next:NextFunction) => {
 
 const addSongIntoPlayList = async (req:Request, res:Response, next:NextFunction) => {
     try {
-        const {songid} = req.params;
+        const {songId} = req.params;
         const userId = req.jwtDecoded.userInfo.userId;
         const playListId = req.body.playListId;
         console.log("playlistid",playListId);
 
-        const result = await SongService.addSongIntoPlayListService(songid,userId,playListId)
+        const result = await SongService.addSongIntoPlayListService(songId,userId,playListId)
         res.status(StatusCodes.OK).json(result)
     } catch (error) {
         next(error);
