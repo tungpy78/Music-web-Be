@@ -60,6 +60,7 @@ const toggleFavorite = async (req:Request, res:Response, next:NextFunction) => {
 
 const addSongIntoPlayList = async (req:Request, res:Response, next:NextFunction) => {
     try {
+        console.log("req.params",req.params);
         const {songId} = req.params;
         const userId = req.jwtDecoded.userInfo.userId;
         const playListId = req.body.playListId;
