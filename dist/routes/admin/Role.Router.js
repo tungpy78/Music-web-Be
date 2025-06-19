@@ -4,6 +4,7 @@ exports.RoleRouter = void 0;
 const express_1 = require("express");
 const RoleController_1 = require("../../controllers/RoleController");
 const role_validatot_1 = require("../../validators/role.validatot");
+const authMiddleware_1 = require("../../middlewares/authMiddleware");
 const router = (0, express_1.Router)();
-router.post('/create/:name', role_validatot_1.RoleValidator.addRoleValidator, RoleController_1.RoleController.create);
+router.post('/create/:name', role_validatot_1.RoleValidator.addRoleValidator, authMiddleware_1.AuthMiddleware.validateRequest, RoleController_1.RoleController.create);
 exports.RoleRouter = router;

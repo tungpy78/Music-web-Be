@@ -17,7 +17,6 @@ const Topic_model_1 = __importDefault(require("../models/Topic.model"));
 const http_status_codes_1 = require("http-status-codes");
 const AppError_1 = __importDefault(require("../Utils/AppError"));
 const Song_model_1 = __importDefault(require("../models/Song.model"));
-const mongoose_1 = __importDefault(require("mongoose"));
 const Cloudinary_1 = __importDefault(require("../Utils/Cloudinary"));
 const ToSlug_1 = require("../Utils/ToSlug");
 const HistoryActionService_1 = require("./HistoryActionService");
@@ -28,13 +27,19 @@ const getTopicsService = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     return topics;
 });
+const getTopicsForAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
+    const topics = yield Topic_model_1.default.find();
+    if (!topics || topics.length === 0) {
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "No topics found.");
+    }
+    return topics;
+});
 const getTopicByIdService = (topicId) => __awaiter(void 0, void 0, void 0, function* () {
-    const topicObjectId = new mongoose_1.default.Types.ObjectId(topicId);
     const songs = yield Song_model_1.default.find({
-        genre: topicObjectId,
+        genre: topicId,
         deleted: false
     }).populate('artist', 'name').populate('genre', 'title');
-    const nameTopic = yield Topic_model_1.default.findById(topicObjectId).select('title').lean();
+    const nameTopic = yield Topic_model_1.default.findById(topicId).select('title').lean();
     if (!songs) {
         throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "No songs found for this topic.");
     }
@@ -59,14 +64,14 @@ const create = (userId, topicRequset) => __awaiter(void 0, void 0, void 0, funct
         return "thêm topic thành công";
     }
     catch (e) {
-        throw new Error("Lôi khi thêm thể loại: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lôi khi thêm thể loại: " + e);
     }
 });
 const updateTopic = (userId, topicRequset, topicId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const topic = yield Topic_model_1.default.findById(topicId);
         if (!topic) {
-            throw new Error("Không tìm thấy topic tương ứng");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Không tìm thấy topic tương ứng");
         }
         let content = `Đã thay đổi các thuộc tính của topic ${topicId}:\n`;
         ;
@@ -98,14 +103,14 @@ const updateTopic = (userId, topicRequset, topicId) => __awaiter(void 0, void 0,
         return "update thành công";
     }
     catch (e) {
-        throw new Error("Lỗi khi sửa topic: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi sửa topic: " + e);
     }
 });
 const deletedtopic = (userId, topicId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const topic = yield Topic_model_1.default.findById(topicId);
         if (!topic) {
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Không tìm thấy thể loại tương ứng: ");
         }
         topic.deleted = true;
         yield topic.save();
@@ -113,21 +118,21 @@ const deletedtopic = (userId, topicId) => __awaiter(void 0, void 0, void 0, func
         return "Xóa thành công";
     }
     catch (e) {
-        throw new Error("Lỗi khi xóa bài nhạc: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi xóa bài nhạc: " + e);
     }
 });
 const restoretopic = (topicId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const topic = yield Topic_model_1.default.findById(topicId);
         if (!topic) {
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Không tìm thấy thể loại tương ứng: ");
         }
         topic.deleted = false;
         yield topic.save();
         return "Khôi phục thành công";
     }
     catch (e) {
-        throw new Error("Lỗi khi xóa bài nhạc: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi xóa bài nhạc: " + e);
     }
 });
 exports.TopicService = {
@@ -136,5 +141,6 @@ exports.TopicService = {
     create,
     updateTopic,
     deletedtopic,
-    restoretopic
+    restoretopic,
+    getTopicsForAdmin
 };

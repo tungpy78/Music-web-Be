@@ -24,11 +24,16 @@ const Redis_1 = require("../Utils/Redis");
 const sendEmail_1 = require("../Utils/sendEmail");
 const inspector_1 = require("inspector");
 const loginService = (phone, password) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield Account_model_1.default.findOne({ phone, deleted: false, status: "active" })
+    const user = yield Account_model_1.default.findOne({ phone, deleted: false, status: true })
         .select("+password")
         .populate("role_id", "role_name");
     if (!user) {
         throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "User không tồn tại");
+    }
+    const userInfo = yield User_model_1.default.findOne({ account_id: user._id });
+    inspector_1.console.log("userInfo", userInfo);
+    if (!userInfo) {
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "Thông tin user không tồn tại");
     }
     const isValid = yield bcrypt_1.default.compare(password, user.password);
     if (!isValid) {
@@ -37,7 +42,6 @@ const loginService = (phone, password) => __awaiter(void 0, void 0, void 0, func
     const roleDoc = user.role_id;
     const payload = {
         userId: userInfo._id,
-        username: user.username,
         phone: user.phone,
         role: (roleDoc === null || roleDoc === void 0 ? void 0 : roleDoc.role_name) || "user",
         fullname: userInfo.fullname,
@@ -142,7 +146,7 @@ const sendOtpService = (email) => __awaiter(void 0, void 0, void 0, function* ()
         throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "Người dùng không tồn tại");
     }
     const otp = (0, generateOTP_1.generateOTP)();
-    const expireSeconds = 15;
+    const expireSeconds = 180;
     yield Redis_1.RedisService.saveOTP(email, otp, expireSeconds);
     yield (0, sendEmail_1.sendMail)(email, "Mã xác thực OTP", `Mã OTP của bạn là: ${otp}`);
     return {

@@ -16,7 +16,7 @@ const getSongs = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     try {
         const { songid } = req.params;
         const userId = req.jwtDecoded.userInfo.userId;
-        const response = yield songService_1.SongService.getSongService(songid, userId !== null && userId !== void 0 ? userId : "");
+        const response = yield songService_1.SongService.getSongService(songid, userId);
         res.status(http_status_codes_1.StatusCodes.OK).json(response);
     }
     catch (error) {
@@ -100,19 +100,20 @@ const addHistorySong = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 const addNewSong = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+    var _a;
     try {
         const userData = req.jwtDecoded;
         const userId = (_a = userData === null || userData === void 0 ? void 0 : userData.userInfo) === null || _a === void 0 ? void 0 : _a.userId;
-        const { title, artist, genre, description, lyrics } = req.body;
+        const { title, artist: rawArtist, genre, description, lyrics } = req.body;
+        const songsArray = Array.isArray(rawArtist)
+            ? rawArtist
+            : rawArtist
+                ? [rawArtist]
+                : [];
         const files = req.files;
-        if (!title || !artist || !genre || !((_b = files === null || files === void 0 ? void 0 : files.fileavatar) === null || _b === void 0 ? void 0 : _b.length) || !((_c = files === null || files === void 0 ? void 0 : files.fileaudio) === null || _c === void 0 ? void 0 : _c.length)) {
-            res.status(400).json({ message: 'Thiếu trường bắt buộc: title, artist, genre, avatar, audio', });
-            return;
-        }
         const songRequest = {
             title,
-            artist,
+            artist: songsArray,
             genre,
             fileavatar: files.fileavatar[0].buffer,
             description,
@@ -134,10 +135,6 @@ const updateSong = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         const { title, artist, genre, description, lyrics } = req.body;
         const { song_id } = req.params;
         const files = req.files;
-        if (!title || !artist || !genre) {
-            res.status(400).json({ message: 'Thiếu trường bắt buộc: title, artist, genre', });
-            return;
-        }
         const songRequest = {
             title,
             artist,
@@ -177,6 +174,15 @@ const restoreSong = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         next(e);
     }
 });
+const getAllSongAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield songService_1.SongService.getAllSongAdmin();
+        res.status(http_status_codes_1.StatusCodes.OK).json(result);
+    }
+    catch (e) {
+        next(e);
+    }
+});
 exports.SongController = {
     getSongs,
     getAllSongs,
@@ -189,5 +195,6 @@ exports.SongController = {
     updateSong,
     deletedSong,
     restoreSong,
-    searchSong
+    searchSong,
+    getAllSongAdmin
 };

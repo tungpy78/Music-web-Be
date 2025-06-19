@@ -77,11 +77,42 @@ const setPassDefault = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         next(e);
     }
 });
+const getAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield AuthService_1.AuthService.getAccount();
+        res.status(http_status_codes_1.StatusCodes.OK).json(result);
+    }
+    catch (e) {
+        next(e);
+    }
+});
+const setStatus = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { account_id } = req.params;
+        const result = yield AuthService_1.AuthService.setStatus(account_id);
+        res.status(http_status_codes_1.StatusCodes.OK).json(result);
+    }
+    catch (e) {
+        next(e);
+    }
+});
+const getAllAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield AuthService_1.AuthService.getAllAccountService();
+        res.status(http_status_codes_1.StatusCodes.OK).json(result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
 exports.AuthController = {
     createAccount,
     setRole,
     getRole,
     setDelete,
     setpassword,
-    setPassDefault
+    setPassDefault,
+    getAccount,
+    setStatus,
+    getAllAccount
 };

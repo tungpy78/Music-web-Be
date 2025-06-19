@@ -25,7 +25,7 @@ const getPlayListService = (userId) => __awaiter(void 0, void 0, void 0, functio
     return playlist;
 });
 const getPlayListByIdService = (playlistId, userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const playlistdetail = yield Playlist_model_1.default.findById(playlistId, { userId: userId })
+    const playlistdetail = yield Playlist_model_1.default.findOne({ _id: playlistId, userId: userId })
         .populate({
         path: 'songs.songId',
         populate: {

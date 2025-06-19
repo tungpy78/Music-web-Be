@@ -14,7 +14,7 @@ const AccountSchema = new mongoose_1.default.Schema({
     },
     role_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Role', required: true, default: new mongoose_1.default.Types.ObjectId("681b1c1327419f6f6416e116") },
     deleted: { type: Boolean, default: false },
-    active: { type: String, enum: ['active', 'inactive'], default: "active" },
+    status: { type: Boolean, default: true },
 }, {
     timestamps: true
 });

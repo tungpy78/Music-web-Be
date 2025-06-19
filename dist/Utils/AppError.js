@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class AppError extends Error {
+class ApiError extends Error {
     constructor(statusCode, message) {
         super(message);
         this.name = 'ApiError';
@@ -8,4 +8,4 @@ class AppError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
-exports.default = AppError;
+exports.default = ApiError;

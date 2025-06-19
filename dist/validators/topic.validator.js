@@ -14,9 +14,8 @@ const createTopic = [
         .notEmpty()
         .withMessage("Title không được để trống"),
     (0, express_validator_1.body)("description")
-        .optional()
-        .isString()
-        .withMessage("Description phải là chuỗi"),
+        .notEmpty()
+        .withMessage("Description không được để trống"),
     (0, express_validator_1.body)("fileAvata")
         .custom((value, { req }) => {
         if (!req.files || !req.files["fileAvata"] || req.files["fileAvata"].length === 0) {
@@ -25,7 +24,25 @@ const createTopic = [
         return true;
     })
 ];
+const updateTopic = [
+    (0, express_validator_1.body)("title")
+        .notEmpty()
+        .withMessage("Title không được để trống"),
+    (0, express_validator_1.body)("description")
+        .notEmpty()
+        .withMessage("Description không được để trống"),
+    (0, express_validator_1.param)("topicId")
+        .isMongoId().withMessage("Topic ID không hợp lệ")
+        .notEmpty().withMessage("Topic ID không được để trống"),
+];
+const deletedtopic = [
+    (0, express_validator_1.param)("topicId")
+        .isMongoId().withMessage("Topic ID không hợp lệ")
+        .notEmpty().withMessage("Topic ID không được để trống")
+];
 exports.topicValidators = {
     getTopicById,
-    createTopic
+    createTopic,
+    updateTopic,
+    deletedtopic
 };

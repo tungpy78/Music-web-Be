@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ArtistRouter = void 0;
+const express_1 = require("express");
+const ArtistController_1 = require("../../controllers/ArtistController");
+const artist_validator_1 = require("../../validators/artist.validator");
+const authMiddleware_1 = require("../../middlewares/authMiddleware");
+const router = (0, express_1.Router)();
+router.get('/:artistId', artist_validator_1.ArtistValidator.getArtistByIdValidator, authMiddleware_1.AuthMiddleware.validateRequest, ArtistController_1.ArtistController.getArtistById);
+exports.ArtistRouter = router;

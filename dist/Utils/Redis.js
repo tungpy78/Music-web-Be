@@ -14,10 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisService = void 0;
 const ioredis_1 = __importDefault(require("ioredis"));
-const redis = new ioredis_1.default({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: Number(process.env.REDIS_PORT) || 6379,
-});
+const redis = new ioredis_1.default(process.env.REDIS_URL || "rediss://default:AXe7AAIjcDEyZTAzOWE4NWQxMDA0MDMyOGQ5NTVmOTczN2ZkYmJlYXAxMA@humble-magpie-30651.upstash.io:6379");
 const saveOTP = (email_1, otp_1, ...args_1) => __awaiter(void 0, [email_1, otp_1, ...args_1], void 0, function* (email, otp, expireSeconds = 300) {
     yield redis.set(`otp:${email}`, otp, 'EX', expireSeconds);
 });

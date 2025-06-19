@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserRouter = void 0;
+const express_1 = require("express");
+const AuthController_1 = require("../../controllers/AuthController");
+const authMiddleware_1 = require("../../middlewares/authMiddleware");
+const router = (0, express_1.Router)();
+router.post('/create', AuthController_1.AuthController.createAccount);
+router.patch('/setrole', authMiddleware_1.AuthMiddleware.isAdmin, AuthController_1.AuthController.setRole);
+router.get('/getrole', AuthController_1.AuthController.getRole);
+router.patch('/setDelete/:account_id', authMiddleware_1.AuthMiddleware.isAdmin, AuthController_1.AuthController.setDelete);
+router.patch('/setStatus/:account_id', authMiddleware_1.AuthMiddleware.isAdmin, AuthController_1.AuthController.setStatus);
+router.patch('/setpassdefault/:account_id', authMiddleware_1.AuthMiddleware.isAdmin, AuthController_1.AuthController.setPassDefault);
+router.patch('/setpass', authMiddleware_1.AuthMiddleware.isAuthorized, AuthController_1.AuthController.setpassword);
+router.get(`/getAllAccount`, authMiddleware_1.AuthMiddleware.isManager, AuthController_1.AuthController.getAllAccount);
+router.get('/getaccount', authMiddleware_1.AuthMiddleware.isAdmin, AuthController_1.AuthController.getAccount);
+exports.UserRouter = router;

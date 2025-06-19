@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RoleService = void 0;
 const Role_model_1 = __importDefault(require("../models/Role.model"));
+const AppError_1 = __importDefault(require("../Utils/AppError"));
+const http_status_codes_1 = require("http-status-codes");
 const create = (name) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const role = new Role_model_1.default();
@@ -22,7 +24,7 @@ const create = (name) => __awaiter(void 0, void 0, void 0, function* () {
         return "thêm thành công";
     }
     catch (e) {
-        throw new Error("Lỗi khi thêm role: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi thêm role: " + e);
     }
 });
 exports.RoleService = {

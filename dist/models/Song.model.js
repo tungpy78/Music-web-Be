@@ -7,7 +7,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 require("./Artist.model");
 const SongSchema = new mongoose_1.default.Schema({
     title: { type: String, required: true },
-    artist: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Artist', required: true },
+    artist: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Artist', required: true }],
     genre: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Topic', required: true },
     avatar: { type: String, required: true },
     audio: String,

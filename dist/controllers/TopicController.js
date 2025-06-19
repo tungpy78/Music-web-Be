@@ -58,10 +58,6 @@ const updateTopic = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         const { topicId } = req.params;
         const { title, description } = req.body;
         const files = req.files;
-        if (!title) {
-            res.status(400).json({ message: 'Thiếu trường bắt buộc: title', });
-            return;
-        }
         const topicRequest = {
             title,
             fileAvata: (_d = (_c = (_b = files === null || files === void 0 ? void 0 : files.fileAvata) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.buffer) !== null && _d !== void 0 ? _d : null,
@@ -97,11 +93,21 @@ const restoretopic = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         next(e);
     }
 });
+const getTopicsForAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield TopicService_1.TopicService.getTopicsForAdmin();
+        res.status(http_status_codes_1.StatusCodes.OK).json(result);
+    }
+    catch (e) {
+        next(e);
+    }
+});
 exports.TopicController = {
     getTopics,
     getTopicById,
     create,
     updateTopic,
     deletedtopic,
-    restoretopic
+    restoretopic,
+    getTopicsForAdmin
 };

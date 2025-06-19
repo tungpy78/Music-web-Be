@@ -95,6 +95,9 @@ const toggleFavoriteService = (songId, userId) => __awaiter(void 0, void 0, void
     }
 });
 const addSongIntoPlayListService = (songId, userId, playListId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!playListId) {
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "Phải chọn PlayList");
+    }
     const existingPlaylist = yield Playlist_model_1.default.findOne({
         _id: new mongoose_1.default.Types.ObjectId(playListId),
         userId: new mongoose_1.default.Types.ObjectId(userId),
@@ -159,38 +162,42 @@ const addNewSong = (userId, songRequest) => __awaiter(void 0, void 0, void 0, fu
             resource_type: 'image',
             folder: 'songs/avatar',
         });
-        const artist = yield Artist_model_1.default.findById(songRequest.artist);
-        if (!artist) {
-            throw new Error("Tác giả không tồn tại");
+        const artistIds = [];
+        for (const artistId of songRequest.artist) {
+            const artist = yield Artist_model_1.default.findById(artistId);
+            if (!artist) {
+                throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, `Tác giả không tồn tại: ${artistId}`);
+            }
+            artistIds.push(new mongoose_1.default.Types.ObjectId(artistId));
         }
         const genre = yield Topic_model_1.default.findById(songRequest.genre);
         if (!genre) {
-            throw new Error("Không có thể loại tương ứng");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Không có thể loại tương ứng");
         }
         const song = new Song_model_1.default();
-        Object.assign(song, Object.assign(Object.assign({}, songRequest), { artist: new mongoose_1.default.Types.ObjectId(songRequest.artist), genre: new mongoose_1.default.Types.ObjectId(songRequest.genre), audio: audioUrl, avatar: avatarUrl }));
+        Object.assign(song, Object.assign(Object.assign({}, songRequest), { artist: artistIds, genre: new mongoose_1.default.Types.ObjectId(songRequest.genre), audio: audioUrl, avatar: avatarUrl }));
         song.slug = (0, ToSlug_1.toSlug)(songRequest.title);
-        const saveSong = yield song.save();
+        yield song.save();
         yield HistoryActionService_1.HistoryActionService.create(userId, "Thêm bài hát mới: " + song.id);
         return "Thêm thành công ";
     }
     catch (e) {
-        throw new Error("Lỗi khi thêm nhạc: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi thêm nhạc: " + e);
     }
 });
 const updateSong = (userId, songRequest, song_id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const song = yield Song_model_1.default.findById(song_id);
         if (!song) {
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Không tìm thấy bài hát tương ứng: ");
         }
         const artist = yield Artist_model_1.default.findById(songRequest.artist);
         if (!artist) {
-            throw new Error("Tác giả không tồn tại");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Tác giả không tồn tại");
         }
         const genre = yield Topic_model_1.default.findById(songRequest.genre);
         if (!genre) {
-            throw new Error("Không có thể loại tương ứng");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Không có thể loại tương ứng");
         }
         let content = `Đã thay đổi các thuộc tính của song ${song_id}:\n`;
         let hasChanges = false;
@@ -228,10 +235,21 @@ const updateSong = (userId, songRequest, song_id) => __awaiter(void 0, void 0, v
             song.lyrics = songRequest.lyrics;
             hasChanges = true;
         }
-        const newArtistId = new mongoose_1.default.Types.ObjectId(songRequest.artist);
-        if (song.artist.toString() !== newArtistId.toString()) {
-            content += `- Tác giả: ${song.artist} -> ${newArtistId}\n`;
-            song.artist = newArtistId;
+        const newArtistIds = [];
+        for (const artistId of songRequest.artist) {
+            const artist = yield Artist_model_1.default.findById(artistId);
+            if (!artist) {
+                throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, `Tác giả không tồn tại: ${artistId}`);
+            }
+            newArtistIds.push(new mongoose_1.default.Types.ObjectId(artistId));
+        }
+        const oldArtistIds = song.artist.map((id) => id.toString());
+        const newArtistIdsStr = newArtistIds.map(id => id.toString());
+        const isDifferent = oldArtistIds.length !== newArtistIdsStr.length ||
+            !oldArtistIds.every(id => newArtistIdsStr.includes(id));
+        if (isDifferent) {
+            content += `- Tác giả: [${oldArtistIds.join(', ')}] -> [${newArtistIdsStr.join(', ')}]\n`;
+            song.artist = newArtistIds;
             hasChanges = true;
         }
         const newGenreId = new mongoose_1.default.Types.ObjectId(songRequest.genre);
@@ -247,14 +265,14 @@ const updateSong = (userId, songRequest, song_id) => __awaiter(void 0, void 0, v
         return "update thành công";
     }
     catch (e) {
-        throw new Error("Lỗi khi thay đổi thông tin: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi thay đổi thông tin: " + e);
     }
 });
 const deletedsong = (userId, song_id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const song = yield Song_model_1.default.findById(song_id);
         if (!song) {
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Không tìm thấy bài hát tương ứng: ");
         }
         song.deleted = true;
         yield song.save();
@@ -262,22 +280,28 @@ const deletedsong = (userId, song_id) => __awaiter(void 0, void 0, void 0, funct
         return "Xóa thành công";
     }
     catch (e) {
-        throw new Error("Lỗi khi xóa bài nhạc: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi xóa bài nhạc: " + e);
     }
 });
 const restoresong = (song_id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const song = yield Song_model_1.default.findById(song_id);
         if (!song) {
-            throw new Error("Không tìm thấy bài hát tương ứng: ");
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, "Không tìm thấy bài hát tương ứng: ");
         }
         song.deleted = false;
         yield song.save();
         return "Khôi phục thành công";
     }
     catch (e) {
-        throw new Error("Lỗi khi xóa bài nhạc: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi xóa bài nhạc: " + e);
     }
+});
+const getAllSongAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
+    const songs = yield Song_model_1.default.find()
+        .populate("artist")
+        .populate("genre");
+    return songs;
 });
 exports.SongService = {
     getSongService,
@@ -291,5 +315,6 @@ exports.SongService = {
     searchSongService,
     updateSong,
     deletedsong,
-    restoresong
+    restoresong,
+    getAllSongAdmin
 };

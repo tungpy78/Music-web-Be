@@ -43,7 +43,7 @@ const isAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
                 next();
             }
             else {
-                res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({ message: "Forbidden: You are not an admin." + JSON.stringify(userData), });
+                res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({ message: "Forbidden: You are not an admin.", });
                 return;
             }
         }));
@@ -62,7 +62,7 @@ const isManager = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                 next();
             }
             else {
-                res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({ message: "Forbidden: You are not an Manager." + JSON.stringify(userData), });
+                res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({ message: "Forbidden: You are not an Manager.", });
                 return;
             }
         }));

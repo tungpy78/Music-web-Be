@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HistoryActionService = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const HistoryAction_model_1 = __importDefault(require("../models/HistoryAction.model"));
+const AppError_1 = __importDefault(require("../Utils/AppError"));
+const http_status_codes_1 = require("http-status-codes");
 const create = (userId, content) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const historyAction = new HistoryAction_model_1.default();
@@ -24,9 +26,39 @@ const create = (userId, content) => __awaiter(void 0, void 0, void 0, function* 
         return "Thành công";
     }
     catch (e) {
-        throw new Error("Lỗi khi thêm thay đổi: " + e);
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi thêm thay đổi: " + e);
+    }
+});
+const getHistoryAction = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const history = yield HistoryAction_model_1.default.find()
+            .sort({ listenedAt: -1 })
+            .populate({
+            path: "userId",
+            select: "fullname account_id",
+            populate: {
+                path: "account_id",
+                select: "phone"
+            }
+        })
+            .select("content userId listenedAt")
+            .lean();
+        return history.map(item => {
+            var _a, _b, _c;
+            return ({
+                _id: item._id,
+                content: item.content,
+                user: ((_a = item.userId) === null || _a === void 0 ? void 0 : _a.fullname) || "Người dùng không xác định",
+                phone: ((_c = (_b = item.userId) === null || _b === void 0 ? void 0 : _b.account_id) === null || _c === void 0 ? void 0 : _c.phone) || "Không có số điện thoại",
+                listenedAt: item.listenedAt
+            });
+        });
+    }
+    catch (e) {
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, "Lỗi khi lấy lịch sử: " + e);
     }
 });
 exports.HistoryActionService = {
-    create
+    create,
+    getHistoryAction
 };

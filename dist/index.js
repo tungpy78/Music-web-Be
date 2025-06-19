@@ -49,9 +49,8 @@ const app = (0, express_1.default)();
 const port = process.env.PORT || 5000;
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-(0, client_1.default)(app);
 (0, admin_1.default)(app);
-app.use(errorHandlingMiddleware_1.errorHandlingMiddleware);
+(0, client_1.default)(app);
 app.use(errorHandlingMiddleware_1.errorHandlingMiddleware);
 app.listen(port, () => {
     console.log(`🚀 Server running on port ${port}`);

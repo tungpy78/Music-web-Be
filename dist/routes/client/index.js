@@ -7,10 +7,14 @@ const song_route_1 = require("./song.route");
 const playlist_route_1 = require("./playlist.route");
 const favorite_route_1 = require("./favorite.route");
 const history_route_1 = require("./history.route");
+const album_route_1 = require("./album.route");
+const artist_route_1 = require("./artist.route");
 const clientRoutes = (app) => {
     app.use(`/topic`, authMiddleware_1.AuthMiddleware.isAuthorized, topic_route_1.topicRoutes);
     app.use(`/song`, authMiddleware_1.AuthMiddleware.isAuthorized, song_route_1.songRoutes);
     app.use(`/playlist`, authMiddleware_1.AuthMiddleware.isAuthorized, playlist_route_1.playlistRoutes);
+    app.use('/album', authMiddleware_1.AuthMiddleware.isAuthorized, album_route_1.AlbumRouter);
+    app.use('/artist', authMiddleware_1.AuthMiddleware.isAuthorized, artist_route_1.ArtistRouter);
     app.use(`/favorite`, authMiddleware_1.AuthMiddleware.isAuthorized, favorite_route_1.favoriteRouter);
     app.use(`/history`, authMiddleware_1.AuthMiddleware.isAuthorized, history_route_1.histotyRoute);
     app.use(`/auth`, user_roure_1.userRouter);

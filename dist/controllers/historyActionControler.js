@@ -8,29 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HistoryService = void 0;
+exports.HistotyActionController = void 0;
+const HistoryActionService_1 = require("../services/HistoryActionService");
 const http_status_codes_1 = require("http-status-codes");
-const History_model_1 = __importDefault(require("../models/History.model"));
-const AppError_1 = __importDefault(require("../Utils/AppError"));
-const getHistoryService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const history = History_model_1.default.find({ userId: userId })
-        .limit(6)
-        .sort({ listenedAt: -1 })
-        .populate({
-        path: 'songId',
-        populate: {
-            path: 'artist',
-        }
-    });
-    if (!history) {
-        throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "Danh sách trống");
+const getHistoryAction = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield HistoryActionService_1.HistoryActionService.getHistoryAction();
+        res.status(http_status_codes_1.StatusCodes.OK).json(response);
     }
-    return history;
+    catch (error) {
+        next(error);
+    }
 });
-exports.HistoryService = {
-    getHistoryService
+exports.HistotyActionController = {
+    getHistoryAction
 };
