@@ -1,13 +1,14 @@
 # render.yaml
-# Hướng dẫn Render cách build và triển khai toàn bộ ứng dụng của bạn.
+# Phiên bản đã được sửa lỗi cú pháp để deploy lên Render.
 
 services:
-  # Dịch vụ 1: Redis Cache (sử dụng dịch vụ có sẵn, miễn phí của Render)
+  # Dịch vụ 1: Redis Cache
   - type: redis
     name: redis-cache
-    plan: free 
+    plan: free
+    ipAllowList: [] # SỬA LỖI 1: Thêm danh sách IP cho phép
 
-  # Dịch vụ 2: Backend NodeJS (sử dụng Dockerfile có sẵn của bạn)
+  # Dịch vụ 2: Backend NodeJS
   - type: web
     name: music-backend-nodejs
     env: docker
@@ -16,14 +17,14 @@ services:
     envVars:
       - key: PORT
         value: 5000
-      # Kết nối đến các dịch vụ khác
       - key: REDIS_HOST
         fromService: { type: redis, name: redis-cache, property: host }
       - key: REDIS_PORT
         fromService: { type: redis, name: redis-cache, property: port }
+      # SỬA LỖI 2: Tự xây dựng URL thay vì dùng fromService
       - key: RECOMMENDATION_API_URL
-        fromService: { type: web, name: music-recommendation-python, property: url }
-      # Các biến môi trường bí mật (sẽ điền trên web Render)
+        value: "https://music-recommendation-python.onrender.com"
+      # Các biến môi trường bí mật
       - key: MONGO_URI
         sync: false
       - key: ACCESS_TOKEN_SECRET
@@ -40,17 +41,21 @@ services:
     envVars:
       - key: MONGO_URI
         sync: false
-      # Thêm một biến để Render biết nó cần tạo Deploy Hook URL
       - key: RENDER_DISCOVERY
         value: "true"
 
-  # Dịch vụ 4: "Người Hẹn Giờ" (Cron Job) - Sẽ chạy vào 2h sáng
+  # Dịch vụ 4: Cron Job (SỬA LỖI 3: Bỏ runtime)
   - type: cron
     name: daily-retrainer
-    # Chạy mỗi ngày vào lúc 19h (UTC), tức là 2h sáng giờ Việt Nam
     schedule: "0 19 * * *" 
-    # Lệnh để "đánh thức" và yêu cầu service Python deploy lại
     startCommand: "curl -X POST $DEPLOY_HOOK_URL"
     envVars:
       - key: DEPLOY_HOOK_URL
-        sync: false # Sẽ điền URL này trên web Render
+        sync: false
+```
+
+#### **Bước 3: Đảm bảo code NodeJS đã được cập nhật**
+Hãy chắc chắn rằng file service NodeJS của bạn (ví dụ `collaborative.service.ts`) đang đọc URL từ biến môi trường, như chúng ta đã thảo luận.
+```typescript
+const RECOMMENDATION_API_URL = process.env.RECOMMENDATION_API_URL || 'http://localhost:5001';
+
