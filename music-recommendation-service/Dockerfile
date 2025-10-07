@@ -1,20 +1,30 @@
-# Dockerfile cho Service Python
+# Sử dụng base image Debian để có sẵn cron
+FROM python:3.9-slim-bullseye
 
-# Sử dụng image Python chính thức, phiên bản 3.9
-FROM python:3.9-slim
+# Cài đặt cron
+RUN apt-get update && apt-get -y install cron
 
-# Set thư mục làm việc bên trong container
+# Đặt thư mục làm việc
 WORKDIR /app
 
-# Copy file requirements và cài đặt các thư viện
+# Copy file requirements và cài đặt dependencies trước để tận dụng cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy toàn bộ code của service Python (app.py, train.py, model.dump, v.v.) vào
+# Copy toàn bộ code của service vào (app.py, train.py, crontab, ...)
 COPY . .
 
-# --- LỆNH KHỞI ĐỘNG THÔNG MINH ---
-# Khi server khởi động, nó sẽ chạy `train.py` để tạo file model.dump mới nhất,
-# SAU ĐÓ mới chạy server Gunicorn để phục vụ API.
-# $PORT là biến môi trường do Render tự động cung cấp.
-CMD python train.py && gunicorn --bind 0.0.0.0:$PORT app:app
+# Copy file crontab vào đúng vị trí của hệ thống
+COPY crontab /etc/cron.d/training-cron
+
+# Cấp quyền đúng cho file crontab
+RUN chmod 0644 /etc/cron.d/training-cron
+
+# Tạo thư mục và file log để tiện theo dõi
+RUN mkdir -p /app/model
+RUN touch /var/log/cron.log
+
+# Command mặc định để khởi động cron ở foreground.
+# Service `model-trainer` sẽ chạy command này.
+# Service `recommendation-service` sẽ ghi đè nó để chạy `python app.py`.
+CMD ["cron", "-f"]

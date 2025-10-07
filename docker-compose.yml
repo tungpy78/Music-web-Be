@@ -1,19 +1,70 @@
+version: '3.8'
 
 services:
+  # Dịch vụ backend chính bằng Node.js
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend # Tên Dockerfile của backend, bạn tự điều chỉnh nếu khác
+    container_name: music-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - recommendation-service
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RECOMMENDATION_SERVICE_URL=http://recommendation-service:5001
+    networks:
+      - music_app_network
+
+  # Dịch vụ API gợi ý bằng Python (chạy app.py)
+  recommendation-service:
+    build:
+      context: ./music-recommendation-service
+      dockerfile: Dockerfile
+    container_name: music-recommendation
+    # Ghi đè CMD mặc định của Dockerfile để chạy app.py
+    command: python app.py
+    ports:
+      - "5001:5001"
+    volumes:
+      - model_data:/app/model
+    networks:
+      - music_app_network
+    env_file:
+      - ./music-recommendation-service/.env
+
+  # Dịch vụ chạy nền để train model (chạy cron)
+  model-trainer:
+    build:
+      context: ./music-recommendation-service
+      dockerfile: Dockerfile # Dùng chung Dockerfile nhưng sẽ chạy CMD mặc định (cron)
+    container_name: music-model-trainer
+    volumes:
+      - model_data:/app/model
+    networks:
+      - music_app_network
+    env_file:
+      - ./music-recommendation-service/.env # Cung cấp env cho train.py nếu cần
+
+  # Dịch vụ Redis
   redis:
     image: redis
     container_name: redis
     ports:
       - "6379:6379"
-  backend:
-    build: .
-    container_name: music-backend
-    ports:
-      - "5000:5000"
-    env_file: 
-      - .env
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+    networks:
+      - music_app_network
+
+# Định nghĩa network chung
+networks:
+  music_app_network:
+    driver: bridge
+
+# Định nghĩa volume để chia sẻ model
+volumes:
+  model_data:
