@@ -5,7 +5,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend # Tên Dockerfile của backend, bạn tự điều chỉnh nếu khác
+      dockerfile: Dockerfile # Tên Dockerfile của backend, bạn tự điều chỉnh nếu khác
     container_name: music-backend
     ports:
       - "5000:5000"
@@ -17,7 +17,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - RECOMMENDATION_SERVICE_URL=http://recommendation-service:5001
+      - RECOMMENDATION_API_URL=http://recommendation-service:5001
     networks:
       - music_app_network
 

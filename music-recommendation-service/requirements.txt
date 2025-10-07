@@ -1,3 +1,6 @@
+# Thêm dòng này vào đầu hoặc cuối file
+numpy<2
+
 pandas
 pymongo
 scikit-surprise

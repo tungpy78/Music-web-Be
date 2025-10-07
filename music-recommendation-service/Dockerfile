@@ -1,8 +1,8 @@
 # Sử dụng base image Debian để có sẵn cron
 FROM python:3.9-slim-bullseye
 
-# Cài đặt cron
-RUN apt-get update && apt-get -y install cron
+# Cài đặt cron VÀ các công cụ build cần thiết (gcc, g++, build-essential)
+RUN apt-get update && apt-get install -y cron gcc g++ build-essential
 
 # Đặt thư mục làm việc
 WORKDIR /app
