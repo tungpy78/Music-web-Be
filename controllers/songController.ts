@@ -15,10 +15,15 @@ const getSongs = async (req:Request, res:Response, next:NextFunction) => {
         next(error);
     }
 }
-const getAllSongs = async (req:Request, res:Response, next:NextFunction) => {
+const getPaginatedSongsController = async (req:Request, res:Response, next:NextFunction) => {
     try {
-        const userId = req.jwtDecoded.userInfo.userId;
-        const response = await SongService.getAllSongsService(userId);
+        // Lấy page và limit từ query params của URL (ví dụ: /api/songs/rankings?page=1&limit=20)
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 20; // Mỗi lần tải 20 bài
+
+        // Gọi đến service mới với các tham số phân trang
+        const response = await SongService.getPaginatedSongsService(page, limit);
+        
         res.status(StatusCodes.OK).json(response);
     } catch (error) {
         next(error);
@@ -187,7 +192,7 @@ const getAllSongAdmin = async (req:Request, res: Response, next:NextFunction) =>
 
 export const SongController = {
     getSongs,
-    getAllSongs,
+    getPaginatedSongsController,
     getSongsByArtist,
     toggleFavorite,
     addSongIntoPlayList,

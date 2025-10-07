@@ -1,0 +1,6 @@
+pandas
+pymongo
+scikit-surprise
+flask
+python-dotenv
+gunicorn

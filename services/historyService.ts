@@ -4,7 +4,7 @@ import ApiError from "../Utils/AppError"
 
 const getHistoryService = async (userId: string) => {
     const history = History.find({userId:userId})
-    .limit(6)
+    .limit(10)
     .sort({ listenedAt: -1 })
     .populate({
         path: 'songId',

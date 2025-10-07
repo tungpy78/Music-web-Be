@@ -11,11 +11,11 @@ const router: Router = Router();
 
 router.get("/search", songValidators.searchSongValidator, AuthMiddleware.validateRequest, SongController.searchSong)
 
+router.get("/rankings", SongController.getPaginatedSongsController)
+
 router.get("/:songid",songValidators.getSongValidator, AuthMiddleware.validateRequest, SongController.getSongs)
 
 router.get("/artist/:artist_id",songValidators.getSongsByArtistValidator, AuthMiddleware.validateRequest, SongController.getSongsByArtist)
-
-router.get("/", SongController.getAllSongs)
 
 router.post("/:songid/favorite", songValidators.toggleFavoriteValidator,AuthMiddleware.validateRequest, SongController.toggleFavorite)
 

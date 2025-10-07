@@ -47,12 +47,32 @@ const getSongService = async (songId: string, userId: string) => {
     }
 }
 
-const getAllSongsService = async (userId: string) => {
-  const songs = await Song.find({ deleted: false }).sort({ like: -1 })
-    .populate("artist")
-    .populate("genre");
-  return songs;
-}
+const getPaginatedSongsService = async (page: number, limit: number) => {
+    // Tính toán số lượng bản ghi cần bỏ qua
+    const skip = (page - 1) * limit;
+
+    // Lấy tổng số bài hát để tính toán tổng số trang cho frontend
+    const totalSongs = await Song.countDocuments({ deleted: false });
+
+    // Truy vấn dữ liệu với .skip() và .limit()
+    const songs = await Song.find({ deleted: false })
+        .sort({ like: -1 }) // Sắp xếp theo lượt thích cho BXH
+        .skip(skip)         // Bỏ qua các bài hát của các trang trước
+        .limit(limit)       // Giới hạn số lượng bài hát cho trang hiện tại
+        .populate("artist")
+        .populate("genre");
+
+    return {
+        message: 'Lấy danh sách bài hát phân trang thành công',
+        data: songs,
+        pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(totalSongs / limit),
+            totalItems: totalSongs
+        }
+    };
+};
+
 const getSongsByArtistService = async (artist_id: string) => {
     const artist = await Artist.findById(artist_id);
     if (!artist) {
@@ -72,27 +92,66 @@ const searchSongService = async (keyword: string) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Keyword is required and must be a string");
   }
 
-  const keywordNoTone = removeVietnameseTones(keyword).toLowerCase();
+  // 1. Tạo một Regular Expression từ keyword để tìm kiếm không phân biệt hoa/thường
+    const keywordNoTone = removeVietnameseTones(keyword).toLowerCase();
+    const keywordRegex = new RegExp(keywordNoTone, 'i');
 
-  // Lấy tất cả bài hát
-  const allSongs = await Song.find()
-    .populate("artist")
-    .populate("genre");
+  // 2. Sử dụng Aggregation Pipeline để tìm kiếm hiệu quả
+  const songs = await Song.aggregate([
+    // Giai đoạn 1: Kết nối (JOIN) với bảng Artist
+    {
+      $lookup: {
+        from: 'Artist', // Tên collection của Artist
+        localField: 'artist',
+        foreignField: '_id',
+        as: 'artistDetails'
+      }
+    },
+    // Giai đoạn 2: Lọc kết quả dựa trên title của bài hát HOẶC name của nghệ sĩ
+    {
+      $match: {
+        $or: [
+            { search_title: keywordRegex },
+            { 'artistDetails.search_name': keywordRegex }
+        ]
+      }
+    },
+    // Giai đoạn 3 (Tùy chọn): Populate thông tin genre
+    {
+        $lookup: {
+            from: "Topics", // Tên collection của Topic/Genre
+            localField: "genre",
+            foreignField: "_id",
+            as: "genreDetails"
+        }
+    },
+    // Giai đoạn 4 (Tùy chọn): Định dạng lại output cho đẹp
+    {
+        $project: {
+            title: 1,
+            like: 1,
+            avatar: 1,
+            audio: 1,
+            slug: 1,
+            artist: "$artistDetails", // Thay thế mảng artist cũ bằng artistDetails
+            genre: { $arrayElemAt: ["$genreDetails", 0] } // Lấy phần tử đầu tiên của genreDetails
+        }
+    },
+     // THÊM GIAI ĐOẠN NÀY VÀO
+    // Giai đoạn 5: Sắp xếp kết quả, ưu tiên bài nhiều like hơn
+    {
+        $sort: { like: -1 } // -1 để sắp xếp từ cao đến thấp
+    },
 
-  // Lọc theo title hoặc artist.name không dấu
-  const filteredSongs = allSongs.filter(song => {
-    const titleNoTone = removeVietnameseTones(song.title).toLowerCase();
-    const artistNameNoTone = song.artist && 'name' in song.artist
-      ? removeVietnameseTones((song.artist as any).name).toLowerCase()
-      : '';
+    // (Tùy chọn) Giai đoạn 6: Giới hạn số lượng kết quả trả về
+    {
+        $limit: 20 // Ví dụ: chỉ lấy 20 kết quả hàng đầu
+    }
 
-    return titleNoTone.includes(keywordNoTone) || artistNameNoTone.includes(keywordNoTone);
-  });
+  ]);
 
-
-  return filteredSongs;
-};
-
+  return songs;
+    };
 
 const toggleFavoriteService = async (songId: string, userId: string) => {
     const existing = await Favorite.findOne({ songId, userId });
@@ -358,7 +417,7 @@ const getAllSongAdmin = async () => {
 
 export const SongService = {
     getSongService,
-    getAllSongsService,
+    getPaginatedSongsService,
     getSongsByArtistService,
     toggleFavoriteService,
     addSongIntoPlayListService,

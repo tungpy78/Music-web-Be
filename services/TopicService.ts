@@ -26,22 +26,37 @@ const getTopicsForAdmin = async () => {
     return topics;
 }
 
-const getTopicByIdService = async (topicId: string) => {
+const getTopicByIdService = async (categoryId: string, page: number, limit: number) => {
 
-     const songs = await Song.find({
-         genre: topicId,
-         deleted: false
-     }).populate('artist', 'name').populate('genre', 'title')
+     const skip = (page - 1) * limit;
+    const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
 
-     const nameTopic = await Topic.findById(topicId).select('title').lean();
-    
-     
-    if (!songs) {
-        throw new ApiError(StatusCodes.NOT_FOUND, "No songs found for this topic.");
-    }
+    // Query "thông minh" tìm trong cả 'genre' và 'topics'
+    const query = {
+        deleted: false,
+        $or: [
+            { genre: categoryObjectId },
+            { topics: categoryObjectId }
+        ]
+    };
+
+    const totalItems = await Song.countDocuments(query);
+    const songs = await Song.find(query)
+        .sort({ like: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('artist');
+
+    const categoryInfo = await Topic.findById(categoryId).select('title').lean();
+
     return {
-        songs,
-        nameTopic
+        message: `Lấy danh sách bài hát cho category ${categoryId} thành công.`,
+        data: songs,
+        categoryName: categoryInfo?.title || '',
+        pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit)
+        }
     };
 }
 

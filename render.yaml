@@ -1,0 +1,56 @@
+# render.yaml
+# Hướng dẫn Render cách build và triển khai toàn bộ ứng dụng của bạn.
+
+services:
+  # Dịch vụ 1: Redis Cache (sử dụng dịch vụ có sẵn, miễn phí của Render)
+  - type: redis
+    name: redis-cache
+    plan: free 
+
+  # Dịch vụ 2: Backend NodeJS (sử dụng Dockerfile có sẵn của bạn)
+  - type: web
+    name: music-backend-nodejs
+    env: docker
+    rootDir: . 
+    dockerfilePath: ./Dockerfile 
+    envVars:
+      - key: PORT
+        value: 5000
+      # Kết nối đến các dịch vụ khác
+      - key: REDIS_HOST
+        fromService: { type: redis, name: redis-cache, property: host }
+      - key: REDIS_PORT
+        fromService: { type: redis, name: redis-cache, property: port }
+      - key: RECOMMENDATION_API_URL
+        fromService: { type: web, name: music-recommendation-python, property: url }
+      # Các biến môi trường bí mật (sẽ điền trên web Render)
+      - key: MONGO_URI
+        sync: false
+      - key: ACCESS_TOKEN_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+        
+  # Dịch vụ 3: Service Gợi ý Python
+  - type: web
+    name: music-recommendation-python
+    env: docker
+    rootDir: ./music-recommendation-service
+    dockerfilePath: ./music-recommendation-service/Dockerfile
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      # Thêm một biến để Render biết nó cần tạo Deploy Hook URL
+      - key: RENDER_DISCOVERY
+        value: "true"
+
+  # Dịch vụ 4: "Người Hẹn Giờ" (Cron Job) - Sẽ chạy vào 2h sáng
+  - type: cron
+    name: daily-retrainer
+    # Chạy mỗi ngày vào lúc 19h (UTC), tức là 2h sáng giờ Việt Nam
+    schedule: "0 19 * * *" 
+    # Lệnh để "đánh thức" và yêu cầu service Python deploy lại
+    startCommand: "curl -X POST $DEPLOY_HOOK_URL"
+    envVars:
+      - key: DEPLOY_HOOK_URL
+        sync: false # Sẽ điền URL này trên web Render
