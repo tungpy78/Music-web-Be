@@ -40,14 +40,14 @@ services:
       - key: RENDER_DISCOVERY
         value: "true"
 
-  # Dịch vụ 4: Cron Job (cần runtime)
-  # Cách gọn nhất: dùng runtime=image + image curl chính chủ
+  # Dịch vụ 4: Cron Job
   - type: cron
     name: daily-retrainer
-    runtime: image              # <-- THÊM runtime
-    image: curlimages/curl:8.6.0
+    runtime: image
+    image:
+      url: curlimages/curl:8.6.0      # <-- phải là object với key "url"
     schedule: "0 19 * * *"
-    dockerCommand: 'sh -c "curl -sS -X POST \"$DEPLOY_HOOK_URL\""'   # lệnh chạy theo lịch
+    dockerCommand: 'sh -c "curl -sS -X POST \"$DEPLOY_HOOK_URL\""'  # lệnh chạy theo lịch
     envVars:
       - key: DEPLOY_HOOK_URL
         sync: false
