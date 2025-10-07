@@ -40,7 +40,8 @@ services:
     envVars:
       - key: MONGO_URI
         sync: false
-      - key: RENDER_DISCOVERY
+      # "Mẹo" để Render tạo Deploy Hook URL
+      - key: RENDER_DISCOVERY 
         value: "true"
 
   # Dịch vụ 4: Cron Job (ĐÃ SỬA LỖI: Bỏ runtime)
