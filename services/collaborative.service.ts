@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Song from '../models/Song.model';
 
-const RECOMMENDATION_API_URL = 'http://host.docker.internal:5001/recommendations';
+const RECOMMENDATION_API_URL = process.env.RECOMMENDATION_API_URL || 'http://localhost:5001';
 
 export const getCollaborativeRecommendations = async (userId: string): Promise<any[]> => {
     try {
