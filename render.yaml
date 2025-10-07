@@ -1,57 +1,56 @@
-# render.yaml
-# Phiên bản hoàn chỉnh, chỉ định rõ gói miễn phí cho tất cả các dịch vụ.
-
+# render.yaml (đã sửa)
 services:
-  # Dịch vụ 1: Redis Cache
-  - type: redis
+  # Dịch vụ 1: Redis (dùng keyvalue thay vì redis)
+  - type: keyvalue
     name: redis-cache
     plan: free
-    ipAllowList: [] 
+    ipAllowList: []   # cho phép nội bộ, chặn ngoài Internet (đúng yêu cầu keyvalue)
 
-  # Dịch vụ 2: Backend NodeJS
+  # Dịch vụ 2: Backend NodeJS (Dockerfile)
   - type: web
     name: music-backend-nodejs
-    env: docker
+    runtime: docker             # <-- Đổi từ env: docker -> runtime: docker
     plan: free # <-- THÊM DÒNG NÀY
-    rootDir: . 
-    dockerfilePath: ./Dockerfile 
+    rootDir: .
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: PORT
         value: 5000
       - key: REDIS_HOST
-        fromService: { type: redis, name: redis-cache, property: host }
+        fromService: { type: keyvalue, name: redis-cache, property: host }
       - key: REDIS_PORT
-        fromService: { type: redis, name: redis-cache, property: port }
+        fromService: { type: keyvalue, name: redis-cache, property: port }
       - key: RECOMMENDATION_API_URL
         value: "https://music-recommendation-python.onrender.com"
-      # Các biến môi trường bí mật
       - key: MONGO_URI
         sync: false
       - key: ACCESS_TOKEN_SECRET
         sync: false
       - key: REFRESH_TOKEN_SECRET
         sync: false
-        
-  # Dịch vụ 3: Service Gợi ý Python
+
+  # Dịch vụ 3: Service gợi ý Python (Dockerfile)
   - type: web
     name: music-recommendation-python
-    env: docker
+    runtime: docker             # <-- Đổi từ env: docker -> runtime: docker
     plan: free # <-- THÊM DÒNG NÀY
     rootDir: ./music-recommendation-service
     dockerfilePath: ./music-recommendation-service/Dockerfile
     envVars:
       - key: MONGO_URI
         sync: false
-      - key: RENDER_DISCOVERY 
+      - key: RENDER_DISCOVERY
         value: "true"
 
   # Dịch vụ 4: Cron Job
   - type: cron
     name: daily-retrainer
     plan: free # <-- THÊM DÒNG NÀY
-    schedule: "0 19 * * *" 
-    startCommand: "curl -X POST $DEPLOY_HOOK_URL"
+    runtime: image
+    image:
+      url: curlimages/curl:8.6.0      # <-- phải là object với key "url"
+    schedule: "0 19 * * *"
+    dockerCommand: 'sh -c "curl -sS -X POST \"$DEPLOY_HOOK_URL\""'  # lệnh chạy theo lịch
     envVars:
       - key: DEPLOY_HOOK_URL
         sync: false
-
