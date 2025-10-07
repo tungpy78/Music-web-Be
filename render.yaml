@@ -6,7 +6,7 @@ services:
   - type: redis
     name: redis-cache
     plan: free
-    ipAllowList: [] # SỬA LỖI 1: Thêm danh sách IP cho phép
+    ipAllowList: [] # SỬA LỖI 1: Thêm danh sách IP cho phép (để trống là cho phép tất cả)
 
   # Dịch vụ 2: Backend NodeJS
   - type: web
@@ -21,7 +21,7 @@ services:
         fromService: { type: redis, name: redis-cache, property: host }
       - key: REDIS_PORT
         fromService: { type: redis, name: redis-cache, property: port }
-      # SỬA LỖI 2: Tự xây dựng URL thay vì dùng fromService
+      # SỬA LỖI 2: Tự xây dựng URL thay vì dùng fromService.property: url
       - key: RECOMMENDATION_API_URL
         value: "https://music-recommendation-python.onrender.com"
       # Các biến môi trường bí mật
@@ -44,7 +44,7 @@ services:
       - key: RENDER_DISCOVERY
         value: "true"
 
-  # Dịch vụ 4: Cron Job (SỬA LỖI 3: Bỏ runtime)
+  # Dịch vụ 4: Cron Job (SỬA LỖI 3: Bỏ thuộc tính không cần thiết)
   - type: cron
     name: daily-retrainer
     schedule: "0 19 * * *" 
@@ -52,10 +52,4 @@ services:
     envVars:
       - key: DEPLOY_HOOK_URL
         sync: false
-```
-
-#### **Bước 3: Đảm bảo code NodeJS đã được cập nhật**
-Hãy chắc chắn rằng file service NodeJS của bạn (ví dụ `collaborative.service.ts`) đang đọc URL từ biến môi trường, như chúng ta đã thảo luận.
-```typescript
-const RECOMMENDATION_API_URL = process.env.RECOMMENDATION_API_URL || 'http://localhost:5001';
 
