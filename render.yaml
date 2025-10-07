@@ -1,12 +1,12 @@
 # render.yaml
-# Phiên bản đã được sửa lỗi cú pháp để deploy lên Render.
+# Phiên bản đã được sửa lỗi cú pháp hoàn chỉnh để deploy lên Render.
 
 services:
   # Dịch vụ 1: Redis Cache
   - type: redis
     name: redis-cache
     plan: free
-    ipAllowList: [] # SỬA LỖI 1: Thêm danh sách IP cho phép (để trống là cho phép tất cả)
+    ipAllowList: [] # Cho phép mọi kết nối đến Redis (phù hợp cho gói miễn phí)
 
   # Dịch vụ 2: Backend NodeJS
   - type: web
@@ -21,10 +21,9 @@ services:
         fromService: { type: redis, name: redis-cache, property: host }
       - key: REDIS_PORT
         fromService: { type: redis, name: redis-cache, property: port }
-      # SỬA LỖI 2: Tự xây dựng URL thay vì dùng fromService.property: url
       - key: RECOMMENDATION_API_URL
         value: "https://music-recommendation-python.onrender.com"
-      # Các biến môi trường bí mật
+      # Các biến môi trường bí mật (sẽ điền trên web Render)
       - key: MONGO_URI
         sync: false
       - key: ACCESS_TOKEN_SECRET
@@ -44,7 +43,7 @@ services:
       - key: RENDER_DISCOVERY
         value: "true"
 
-  # Dịch vụ 4: Cron Job (SỬA LỖI 3: Bỏ thuộc tính không cần thiết)
+  # Dịch vụ 4: Cron Job (ĐÃ SỬA LỖI: Bỏ runtime)
   - type: cron
     name: daily-retrainer
     schedule: "0 19 * * *" 
