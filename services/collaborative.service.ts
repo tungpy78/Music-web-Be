@@ -1,7 +1,10 @@
 import axios from 'axios';
 import Song from '../models/Song.model';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const RECOMMENDATION_API_URL = process.env.RECOMMENDATION_API_URL || 'http://localhost:5001';
+
+const RECOMMENDATION_API_URL = process.env.RECOMMENDATION_API_URL || 'http://recommendation-service:5001';
 
 export const getCollaborativeRecommendations = async (userId: string): Promise<any[]> => {
     try {
