@@ -29,7 +29,7 @@ def train_and_save_model():
 
     # 4. Lưu mô hình và trainset (cần trainset để lấy thông tin map id)
     # File này sẽ được API sử dụng
-    dump.dump('./model.dump', algo=algo)
+    dump.dump('/app/model/model.dump', algo=algo)
     print("Mô hình đã được lưu vào file model.dump")
 
 
