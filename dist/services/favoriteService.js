@@ -13,13 +13,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.favoriteService = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const Favorite_model_1 = __importDefault(require("../models/Favorite.model"));
-const getFavoriteService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const favorite = yield Favorite_model_1.default.find({
-        userId
-    }).populate('songId');
-    const songs = favorite.map(item => item.songId);
-    return songs;
+const getFavoriteService = (userId, page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const skip = (page - 1) * limit;
+    const userObjectId = new mongoose_1.default.Types.ObjectId(userId);
+    const totalItems = yield Favorite_model_1.default.countDocuments({ userId: userObjectId });
+    const favorites = yield Favorite_model_1.default.aggregate([
+        { $match: { userId: userObjectId } },
+        { $sort: { addedAt: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+            $lookup: {
+                from: 'Songs',
+                localField: 'songId',
+                foreignField: '_id',
+                as: 'songDetails'
+            }
+        },
+        { $unwind: '$songDetails' },
+        {
+            $lookup: {
+                from: 'Artist',
+                localField: 'songDetails.artist',
+                foreignField: '_id',
+                as: 'songDetails.artist'
+            }
+        },
+        { $replaceRoot: { newRoot: '$songDetails' } }
+    ]);
+    return {
+        message: 'Lấy danh sách yêu thích thành công.',
+        data: favorites,
+        pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit),
+            totalItems: totalItems
+        }
+    };
 });
 exports.favoriteService = {
     getFavoriteService

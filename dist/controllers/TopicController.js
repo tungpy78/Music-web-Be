@@ -23,8 +23,10 @@ const getTopics = (req, res, next) => __awaiter(void 0, void 0, void 0, function
 });
 const getTopicById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
         const { topicId } = req.params;
-        const result = yield TopicService_1.TopicService.getTopicByIdService(topicId);
+        const result = yield TopicService_1.TopicService.getTopicByIdService(topicId, page, limit);
         res.status(http_status_codes_1.StatusCodes.OK).json(result);
     }
     catch (error) {

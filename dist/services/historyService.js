@@ -18,7 +18,7 @@ const History_model_1 = __importDefault(require("../models/History.model"));
 const AppError_1 = __importDefault(require("../Utils/AppError"));
 const getHistoryService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     const history = History_model_1.default.find({ userId: userId })
-        .limit(6)
+        .limit(10)
         .sort({ listenedAt: -1 })
         .populate({
         path: 'songId',

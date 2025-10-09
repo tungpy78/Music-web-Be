@@ -23,9 +23,12 @@ const toggleFavoriteValidator = [
         .isMongoId().withMessage("Song ID không hợp lệ"),
 ];
 const addSongIntoPlayListValidator = [
-    (0, express_validator_1.param)("playListId")
-        .notEmpty().withMessage("PlayList ID không được để trống")
-        .isMongoId().withMessage("PlayList ID không hợp lệ"),
+    (0, express_validator_1.param)("songid")
+        .notEmpty().withMessage("Song ID không được để trống1")
+        .isMongoId().withMessage("Song ID không hợp lệ1"),
+    (0, express_validator_1.body)("playListId")
+        .notEmpty().withMessage("playList ID không được để trống")
+        .isMongoId().withMessage("playList ID không hợp lệ"),
 ];
 const createPlayListValidator = [
     (0, express_validator_1.body)("name")

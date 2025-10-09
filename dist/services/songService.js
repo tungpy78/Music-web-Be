@@ -49,11 +49,24 @@ const getSongService = (songId, userId) => __awaiter(void 0, void 0, void 0, fun
         allPlayList
     };
 });
-const getAllSongsService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const songs = yield Song_model_1.default.find({ deleted: false }).sort({ like: -1 })
+const getPaginatedSongsService = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const skip = (page - 1) * limit;
+    const totalSongs = yield Song_model_1.default.countDocuments({ deleted: false });
+    const songs = yield Song_model_1.default.find({ deleted: false })
+        .sort({ like: -1 })
+        .skip(skip)
+        .limit(limit)
         .populate("artist")
         .populate("genre");
-    return songs;
+    return {
+        message: 'Lấy danh sách bài hát phân trang thành công',
+        data: songs,
+        pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(totalSongs / limit),
+            totalItems: totalSongs
+        }
+    };
 });
 const getSongsByArtistService = (artist_id) => __awaiter(void 0, void 0, void 0, function* () {
     const artist = yield Artist_model_1.default.findById(artist_id);
@@ -69,17 +82,51 @@ const searchSongService = (keyword) => __awaiter(void 0, void 0, void 0, functio
         throw new AppError_1.default(http_status_codes_1.StatusCodes.BAD_REQUEST, "Keyword is required and must be a string");
     }
     const keywordNoTone = (0, removeVietnameseTones_1.removeVietnameseTones)(keyword).toLowerCase();
-    const allSongs = yield Song_model_1.default.find()
-        .populate("artist")
-        .populate("genre");
-    const filteredSongs = allSongs.filter(song => {
-        const titleNoTone = (0, removeVietnameseTones_1.removeVietnameseTones)(song.title).toLowerCase();
-        const artistNameNoTone = song.artist && 'name' in song.artist
-            ? (0, removeVietnameseTones_1.removeVietnameseTones)(song.artist.name).toLowerCase()
-            : '';
-        return titleNoTone.includes(keywordNoTone) || artistNameNoTone.includes(keywordNoTone);
-    });
-    return filteredSongs;
+    const keywordRegex = new RegExp(keywordNoTone, 'i');
+    const songs = yield Song_model_1.default.aggregate([
+        {
+            $lookup: {
+                from: 'Artist',
+                localField: 'artist',
+                foreignField: '_id',
+                as: 'artistDetails'
+            }
+        },
+        {
+            $match: {
+                $or: [
+                    { search_title: keywordRegex },
+                    { 'artistDetails.search_name': keywordRegex }
+                ]
+            }
+        },
+        {
+            $lookup: {
+                from: "Topics",
+                localField: "genre",
+                foreignField: "_id",
+                as: "genreDetails"
+            }
+        },
+        {
+            $project: {
+                title: 1,
+                like: 1,
+                avatar: 1,
+                audio: 1,
+                slug: 1,
+                artist: "$artistDetails",
+                genre: { $arrayElemAt: ["$genreDetails", 0] }
+            }
+        },
+        {
+            $sort: { like: -1 }
+        },
+        {
+            $limit: 20
+        }
+    ]);
+    return songs;
 });
 const toggleFavoriteService = (songId, userId) => __awaiter(void 0, void 0, void 0, function* () {
     const existing = yield Favorite_model_1.default.findOne({ songId, userId });
@@ -98,35 +145,27 @@ const addSongIntoPlayListService = (songId, userId, playListId) => __awaiter(voi
     if (!playListId) {
         throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "Phải chọn PlayList");
     }
-    const existingPlaylist = yield Playlist_model_1.default.findOne({
+    const playlist = yield Playlist_model_1.default.findOne({
         _id: new mongoose_1.default.Types.ObjectId(playListId),
         userId: new mongoose_1.default.Types.ObjectId(userId),
-        'songs.songId': new mongoose_1.default.Types.ObjectId(songId)
     });
-    if (existingPlaylist) {
+    if (!playlist) {
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "Playlist không tồn tại.");
+    }
+    if (playlist.songs.length >= 20) {
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.BAD_REQUEST, "Playlist đã đạt tối đa 20 bài hát.");
+    }
+    const isExisted = playlist.songs.some(song => { var _a; return ((_a = song.songId) === null || _a === void 0 ? void 0 : _a.toString()) === songId; });
+    if (isExisted) {
         return {
             message: "Bài hát đã tồn tại trong PlayList."
         };
     }
-    const addSongPlayList = yield Playlist_model_1.default.updateOne({
-        _id: new mongoose_1.default.Types.ObjectId(playListId),
-        userId: new mongoose_1.default.Types.ObjectId(userId),
-        'songs.songId': { $ne: new mongoose_1.default.Types.ObjectId(songId) }
-    }, {
-        $push: {
-            songs: { songId: new mongoose_1.default.Types.ObjectId(songId) }
-        }
-    });
-    if (addSongPlayList.modifiedCount > 0) {
-        return {
-            message: "Thêm vào PlayList thành công."
-        };
-    }
-    else {
-        return {
-            message: "Bài hát đã tồn tại hoặc playlist không tồn tại."
-        };
-    }
+    playlist.songs.push({ songId: new mongoose_1.default.Types.ObjectId(songId) });
+    yield playlist.save();
+    return {
+        message: "Thêm vào PlayList thành công."
+    };
 });
 const createPlayListService = (songId, userId, name) => __awaiter(void 0, void 0, void 0, function* () {
     const existingPlaylist = yield Playlist_model_1.default.findOne({ name, userId });
@@ -305,7 +344,7 @@ const getAllSongAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.SongService = {
     getSongService,
-    getAllSongsService,
+    getPaginatedSongsService,
     getSongsByArtistService,
     toggleFavoriteService,
     addSongIntoPlayListService,

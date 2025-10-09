@@ -13,27 +13,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMail = void 0;
-const nodemailer_1 = __importDefault(require("nodemailer"));
+const mail_1 = __importDefault(require("@sendgrid/mail"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const transporter = nodemailer_1.default.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASSWORD,
-    },
-});
+const sendgridApiKey = process.env.SENDGRID_API_KEY;
+if (!sendgridApiKey) {
+    throw new Error('SENDGRID_API_KEY environment variable is not set');
+}
+mail_1.default.setApiKey(sendgridApiKey);
 const sendMail = (to, subject, html) => __awaiter(void 0, void 0, void 0, function* () {
+    const from = process.env.MAIL_USER;
+    if (!from) {
+        throw new Error('MAIL_USER environment variable is not set');
+    }
+    const msg = {
+        to: to,
+        from: from,
+        subject: subject,
+        html: html,
+    };
     try {
-        yield transporter.sendMail({
-            from: process.env.MAIL_USER,
-            to,
-            subject,
-            html,
-        });
+        yield mail_1.default.send(msg);
+        console.log(`Email sent successfully to ${to}`);
     }
     catch (error) {
-        console.error('Error sending mail:', error);
+        console.error('Error sending mail with SendGrid:', error);
+        if (error) {
+            console.error(error);
+        }
         throw error;
     }
 });

@@ -9,6 +9,8 @@ const favorite_route_1 = require("./favorite.route");
 const history_route_1 = require("./history.route");
 const album_route_1 = require("./album.route");
 const artist_route_1 = require("./artist.route");
+const recommendation_route_1 = require("./recommendation.route");
+const test_route_1 = require("./test.route");
 const clientRoutes = (app) => {
     app.use(`/topic`, authMiddleware_1.AuthMiddleware.isAuthorized, topic_route_1.topicRoutes);
     app.use(`/song`, authMiddleware_1.AuthMiddleware.isAuthorized, song_route_1.songRoutes);
@@ -17,6 +19,8 @@ const clientRoutes = (app) => {
     app.use('/artist', authMiddleware_1.AuthMiddleware.isAuthorized, artist_route_1.ArtistRouter);
     app.use(`/favorite`, authMiddleware_1.AuthMiddleware.isAuthorized, favorite_route_1.favoriteRouter);
     app.use(`/history`, authMiddleware_1.AuthMiddleware.isAuthorized, history_route_1.histotyRoute);
+    app.use(`/recommendation`, authMiddleware_1.AuthMiddleware.isAuthorized, recommendation_route_1.recommendationRouter);
+    app.use(`/test`, authMiddleware_1.AuthMiddleware.isAuthorized, test_route_1.testRouter);
     app.use(`/auth`, user_roure_1.userRouter);
 };
 exports.default = clientRoutes;

@@ -9,21 +9,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.favoriteController = void 0;
+exports.testController = void 0;
 const http_status_codes_1 = require("http-status-codes");
-const favoriteService_1 = require("../services/favoriteService");
-const getFavorite = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const contentBased_service_1 = require("../services/contentBased.service");
+const testSessionRecsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { songid } = req.params;
+    const userId = req.jwtDecoded.userInfo.userId;
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const userId = req.jwtDecoded.userInfo.userId;
-        const result = yield favoriteService_1.favoriteService.getFavoriteService(userId, page, limit);
-        res.status(http_status_codes_1.StatusCodes.OK).json(result);
+        const recommendations = yield (0, contentBased_service_1.getContentBasedRecommendations)(songid);
+        res.status(http_status_codes_1.StatusCodes.OK).json({ recommendations });
     }
     catch (error) {
-        next(error);
+        console.error("Lỗi khi lấy gợi ý dựa trên phiên nghe nhạc:", error);
+        res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Lỗi máy chủ khi lấy gợi ý." });
     }
 });
-exports.favoriteController = {
-    getFavorite
+exports.testController = {
+    testSessionRecsController
 };

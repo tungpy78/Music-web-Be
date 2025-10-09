@@ -17,6 +17,7 @@ const Topic_model_1 = __importDefault(require("../models/Topic.model"));
 const http_status_codes_1 = require("http-status-codes");
 const AppError_1 = __importDefault(require("../Utils/AppError"));
 const Song_model_1 = __importDefault(require("../models/Song.model"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const Cloudinary_1 = __importDefault(require("../Utils/Cloudinary"));
 const ToSlug_1 = require("../Utils/ToSlug");
 const HistoryActionService_1 = require("./HistoryActionService");
@@ -34,18 +35,31 @@ const getTopicsForAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     return topics;
 });
-const getTopicByIdService = (topicId) => __awaiter(void 0, void 0, void 0, function* () {
-    const songs = yield Song_model_1.default.find({
-        genre: topicId,
-        deleted: false
-    }).populate('artist', 'name').populate('genre', 'title');
-    const nameTopic = yield Topic_model_1.default.findById(topicId).select('title').lean();
-    if (!songs) {
-        throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "No songs found for this topic.");
-    }
+const getTopicByIdService = (categoryId, page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const skip = (page - 1) * limit;
+    const categoryObjectId = new mongoose_1.default.Types.ObjectId(categoryId);
+    const query = {
+        deleted: false,
+        $or: [
+            { genre: categoryObjectId },
+            { topics: categoryObjectId }
+        ]
+    };
+    const totalItems = yield Song_model_1.default.countDocuments(query);
+    const songs = yield Song_model_1.default.find(query)
+        .sort({ like: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('artist');
+    const categoryInfo = yield Topic_model_1.default.findById(categoryId).select('title').lean();
     return {
-        songs,
-        nameTopic
+        message: `Lấy danh sách bài hát cho category ${categoryId} thành công.`,
+        data: songs,
+        categoryName: (categoryInfo === null || categoryInfo === void 0 ? void 0 : categoryInfo.title) || '',
+        pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit)
+        }
     };
 });
 const create = (userId, topicRequset) => __awaiter(void 0, void 0, void 0, function* () {

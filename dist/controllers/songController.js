@@ -23,10 +23,11 @@ const getSongs = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         next(error);
     }
 });
-const getAllSongs = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const getPaginatedSongsController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = req.jwtDecoded.userInfo.userId;
-        const response = yield songService_1.SongService.getAllSongsService(userId);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const response = yield songService_1.SongService.getPaginatedSongsService(page, limit);
         res.status(http_status_codes_1.StatusCodes.OK).json(response);
     }
     catch (error) {
@@ -66,9 +67,12 @@ const toggleFavorite = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
 });
 const addSongIntoPlayList = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("req.params", req.params);
         const { songid } = req.params;
         const userId = req.jwtDecoded.userInfo.userId;
         const playListId = req.body.playListId;
+        console.log("playlistid", playListId);
+        console.log("songId", songid);
         const result = yield songService_1.SongService.addSongIntoPlayListService(songid, userId, playListId);
         res.status(http_status_codes_1.StatusCodes.OK).json(result);
     }
@@ -185,7 +189,7 @@ const getAllSongAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
 });
 exports.SongController = {
     getSongs,
-    getAllSongs,
+    getPaginatedSongsController,
     getSongsByArtist,
     toggleFavorite,
     addSongIntoPlayList,

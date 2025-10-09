@@ -8,7 +8,7 @@ const RECOMMENDATION_API_URL = process.env.RECOMMENDATION_API_URL || 'http://loc
 
 export const getCollaborativeRecommendations = async (userId: string): Promise<any[]> => {
     try {
-        const response = await axios.get(`${RECOMMENDATION_API_URL}/${userId}?limit=20`);
+        const response = await axios.get(`${RECOMMENDATION_API_URL}/recommendations/${userId}?limit=20`);
         const recommendedSongIds: string[] = response.data.recommendations;
 
         if (recommendedSongIds && recommendedSongIds.length > 0) {
