@@ -16,6 +16,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy toàn bộ code của service Python vào
 COPY . .
 
+# --- THÊM DÒNG NÀY ĐỂ SỬA LỖI ---
+# Tạo sẵn thư mục /app/model để script train.py có thể lưu file vào
+RUN mkdir -p /app/model
+
 # Command mặc định (có thể bị docker-compose ghi đè, nhưng là good practice)
 CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]
 
