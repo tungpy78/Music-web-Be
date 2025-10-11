@@ -4,15 +4,21 @@ import { getSessionBasedRecommendations } from './sessionBased.service';
 import { getContentBasedRecommendations } from './contentBased.service';
 import mongoose from 'mongoose';
 
+
+// --- ĐÂY LÀ "CÔNG TẮC" ---
+const isSmartRecsEnabled = process.env.ENABLE_SMART_RECOMMENDATIONS === 'true';
+
 /**
  * Lấy danh sách gợi ý cho trang chủ.
  * Logic: Collaborative Filtering -> fallback Top Trending.
  */
 export const getHomepageRecommendations = async (userId: string) => {
     // 1. Cố gắng lấy gợi ý cá nhân hóa từ Lọc cộng tác
-    const collaborativeSongs = await getCollaborativeRecommendations(userId);
-    if (collaborativeSongs.length > 0) {
-        return collaborativeSongs;
+    // Nếu "công tắc" được bật, ưu tiên Lọc cộng tác
+    if (isSmartRecsEnabled) {
+        console.log("Chế độ thông minh: Đang tìm gợi ý cho trang chủ...");
+        const collaborativeSongs = await getCollaborativeRecommendations(userId);
+        if (collaborativeSongs.length > 0) return collaborativeSongs;
     }
 
     // 2. Fallback: Nếu không có, trả về top bài hát thịnh hành

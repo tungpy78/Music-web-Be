@@ -1,30 +1,21 @@
-# Sử dụng base image Debian để có sẵn cron
-FROM python:3.9-slim-bullseye
+# Dockerfile cho Service Python (Phiên bản đơn giản)
 
-# Cài đặt cron VÀ các công cụ build cần thiết (gcc, g++, build-essential)
-RUN apt-get update && apt-get install -y cron gcc g++ build-essential
+# Sử dụng image Python chính thức, phiên bản 3.9
+FROM python:3.9-slim
 
-# Đặt thư mục làm việc
+# Cài đặt các công cụ build cần thiết cho scikit-surprise
+RUN apt-get update && apt-get install -y gcc g++ build-essential
+
+# Set thư mục làm việc bên trong container
 WORKDIR /app
 
-# Copy file requirements và cài đặt dependencies trước để tận dụng cache
+# Copy file requirements và cài đặt các thư viện
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy toàn bộ code của service vào (app.py, train.py, crontab, ...)
+# Copy toàn bộ code của service Python vào
 COPY . .
 
-# Copy file crontab vào đúng vị trí của hệ thống
-COPY crontab /etc/cron.d/training-cron
+# Command mặc định (có thể bị docker-compose ghi đè, nhưng là good practice)
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]
 
-# Cấp quyền đúng cho file crontab
-RUN chmod 0644 /etc/cron.d/training-cron
-
-# Tạo thư mục và file log để tiện theo dõi
-RUN mkdir -p /app/model
-RUN touch /var/log/cron.log
-
-# Command mặc định để khởi động cron ở foreground.
-# Service `model-trainer` sẽ chạy command này.
-# Service `recommendation-service` sẽ ghi đè nó để chạy `python app.py`.
-CMD ["cron", "-f"]

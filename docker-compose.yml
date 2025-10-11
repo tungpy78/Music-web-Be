@@ -1,11 +1,18 @@
 version: '3.8'
 
 services:
-  # Dịch vụ backend chính bằng Node.js
+  # Dịch vụ 1: Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - music_app_network
+
+  # Dịch vụ 2: Backend chính bằng Node.js
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile # Tên Dockerfile của backend, bạn tự điều chỉnh nếu khác
+    build: .
     container_name: music-backend
     ports:
       - "5000:5000"
@@ -18,53 +25,29 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - RECOMMENDATION_API_URL=http://recommendation-service:5001
+      # --- BẬT "CÔNG TẮC" THÔNG MINH CHO MÔI TRƯỜDNG LOCAL ---
+      - ENABLE_SMART_RECOMMENDATIONS=true 
     networks:
       - music_app_network
 
-  # Dịch vụ API gợi ý bằng Python (chạy app.py)
+  # Dịch vụ 3: API Gợi ý Python (Đã tích hợp tự huấn luyện)
   recommendation-service:
     build:
       context: ./music-recommendation-service
       dockerfile: Dockerfile
     container_name: music-recommendation
-    # Ghi đè CMD mặc định của Dockerfile để chạy app.py
-    command: python app.py
     ports:
       - "5001:5001"
-    volumes:
-      - model_data:/app/model
+    # --- LỆNH KHỞI ĐỘNG THÔNG MINH ---
+    # Chạy `train.py` trước, sau đó mới khởi động server Flask trên port 5001
+    command: sh -c "python train.py && flask run --host=0.0.0.0 --port=5001"
     networks:
       - music_app_network
     env_file:
       - ./music-recommendation-service/.env
 
-  # Dịch vụ chạy nền để train model (chạy cron)
-  model-trainer:
-    build:
-      context: ./music-recommendation-service
-      dockerfile: Dockerfile # Dùng chung Dockerfile nhưng sẽ chạy CMD mặc định (cron)
-    container_name: music-model-trainer
-    volumes:
-      - model_data:/app/model
-    networks:
-      - music_app_network
-    env_file:
-      - ./music-recommendation-service/.env # Cung cấp env cho train.py nếu cần
-
-  # Dịch vụ Redis
-  redis:
-    image: redis
-    container_name: redis
-    ports:
-      - "6379:6379"
-    networks:
-      - music_app_network
-
-# Định nghĩa network chung
+# Định nghĩa network chung để các service có thể "nói chuyện" với nhau
 networks:
   music_app_network:
     driver: bridge
 
-# Định nghĩa volume để chia sẻ model
-volumes:
-  model_data:

@@ -1,5 +1,0 @@
-# Chạy script train.py vào lúc 2:00 sáng mỗi ngày
-# Ghi lại output và lỗi (nếu có) vào file log để kiểm tra
-0 2 * * * python /app/train.py >> /var/log/cron.log 2>&1
-
-# Cron yêu cầu một dòng trống ở cuối file để hoạt động đúng
