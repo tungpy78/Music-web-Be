@@ -14,8 +14,8 @@ const shuffleArray = (array: any[]) => {
 /**
  * Gợi ý các bài hát dựa trên phiên nghe nhạc, với logic cân bằng và linh hoạt.
  * - Tối đa 5 bài "Khai thác" (cùng nghệ sĩ).
- * - Tối thiểu 2 bài "Khám phá mạnh" (khác thể loại).
- * - Phần còn lại dành cho "Khám phá mềm" (cùng thể loại).
+ * - Cố định 2 bài "Khám phá mạnh" (khác thể loại).
+ * - Phần còn lại dành cho "Khám phá mềm" (cùng thể loại, khác nghệ sĩ).
  */
 export const getSessionBasedRecommendations = async (
     userId: string, 
@@ -32,7 +32,7 @@ export const getSessionBasedRecommendations = async (
             .limit(historyLimit)
             .populate({
                 path: 'songId', model: 'Song',
-                populate: [{ path: 'artist', model: 'Artist' }, { path: 'genre', model: 'Category' }]
+                populate: [{ path: 'artist', model: 'Artist' }, { path: 'genre', model: 'Topic' }]
             });
 
         if (recentHistory.length < 2) return [];
@@ -63,7 +63,7 @@ export const getSessionBasedRecommendations = async (
         let finalRecommendations: any[] = [];
         const allExcludeIds = [...recentSongs.map(s => s._id), ...excludeIds.map(id => new mongoose.Types.ObjectId(id))];
         
-        // --- LOGIC GỢI Ý 5-3-2 LINH HOẠT ---
+        // --- LOGIC GỢI Ý LINH HOẠT THEO TỶ LỆ MONG MUỐN ---
 
         // 2. Bước A (Khai thác): Lấy TỐI ĐA 5 bài của nghệ sĩ nổi bật
         const exploitationLimit = 5;
@@ -77,31 +77,29 @@ export const getSessionBasedRecommendations = async (
 
         let currentExcludeIds = [...allExcludeIds, ...finalRecommendations.map(s => s._id)];
 
-        // 3. Bước C (Khám phá mạnh): LUÔN LẤY 2 BÀI khác thể loại trước
+        // 3. Bước C (Khám phá mạnh): Cố gắng lấy 2 BÀI khác thể loại
         const diverseLimit = 2;
         let diverseSongs: any[] = [];
-        if (finalRecommendations.length <= (recommendationLimit - diverseLimit)) {
-             if (!secondTopGenreId) { // Tìm thể loại ngẫu nhiên nếu cần
-                const popularGenres = await Song.aggregate([
-                    { $match: { genre: { $nin: [new mongoose.Types.ObjectId(topGenreId)] } } },
-                    { $group: { _id: '$genre', count: { $sum: 1 } } },
-                    { $sort: { count: -1 } },
-                    { $limit: 5 }
-                ]);
-                if (popularGenres.length > 0) {
-                    secondTopGenreId = popularGenres[Math.floor(Math.random() * popularGenres.length)]._id.toString();
-                }
-            }
-
-            if (secondTopGenreId) {
-                diverseSongs = await Song.find({
-                    _id: { $nin: currentExcludeIds },
-                    genre: new mongoose.Types.ObjectId(secondTopGenreId)
-                }).sort({ like: -1 }).limit(diverseLimit).populate('artist').populate('genre');
+        if (!secondTopGenreId) { // Tìm thể loại ngẫu nhiên nếu cần
+            const popularGenres = await Song.aggregate([
+                { $match: { genre: { $nin: [new mongoose.Types.ObjectId(topGenreId)] } } },
+                { $group: { _id: '$genre', count: { $sum: 1 } } },
+                { $sort: { count: -1 } },
+                { $limit: 5 }
+            ]);
+            if (popularGenres.length > 0) {
+                secondTopGenreId = popularGenres[Math.floor(Math.random() * popularGenres.length)]._id.toString();
             }
         }
+
+        if (secondTopGenreId) {
+            diverseSongs = await Song.find({
+                _id: { $nin: currentExcludeIds },
+                genre: new mongoose.Types.ObjectId(secondTopGenreId)
+            }).sort({ like: -1 }).limit(diverseLimit).populate('artist').populate('genre');
+        }
         
-        currentExcludeIds = [...currentExcludeIds, ...diverseSongs.map(s => s._id)];
+        currentExcludeIds.push(...diverseSongs.map(s => s._id));
         
         // 4. Bước B (Khám phá mềm): Dùng các suất còn lại để lấp đầy bằng các bài cùng thể loại
         const remainingLimit = recommendationLimit - finalRecommendations.length - diverseSongs.length;
