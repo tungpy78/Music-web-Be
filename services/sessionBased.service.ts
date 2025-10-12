@@ -12,10 +12,8 @@ const shuffleArray = (array: any[]) => {
 }
 
 /**
- * Gợi ý các bài hát dựa trên phiên nghe nhạc, với logic cân bằng và linh hoạt.
- * - Tối đa 5 bài "Khai thác" (cùng nghệ sĩ).
- * - Cố định 2 bài "Khám phá mạnh" (khác thể loại).
- * - Phần còn lại dành cho "Khám phá mềm" (cùng thể loại, khác nghệ sĩ).
+ * Gợi ý các bài hát dựa trên phiên nghe nhạc, với logic "Khám phá" được cải tiến
+ * để lấy ngẫu nhiên các bài hát, tăng tính bất ngờ.
  */
 export const getSessionBasedRecommendations = async (
     userId: string, 
@@ -24,7 +22,7 @@ export const getSessionBasedRecommendations = async (
     excludeIds: string[] = []
 ): Promise<any[]> => {
     try {
-        console.log("Thử gợi ý dựa trên phiên (logic tinh chỉnh cuối cùng)...");
+        console.log("Thử gợi ý dựa trên phiên (tăng tính ngẫu nhiên)...");
         
         // 1. Phân tích lịch sử nghe với trọng số (như cũ)
         const recentHistory = await History.find({ userId: new mongoose.Types.ObjectId(userId) })
@@ -32,7 +30,7 @@ export const getSessionBasedRecommendations = async (
             .limit(historyLimit)
             .populate({
                 path: 'songId', model: 'Song',
-                populate: [{ path: 'artist', model: 'Artist' }, { path: 'genre', model: 'Topic' }]
+                populate: [{ path: 'artist', model: 'Artist' }, { path: 'genre', model: 'Category' }]
             });
 
         if (recentHistory.length < 2) return [];
@@ -63,9 +61,7 @@ export const getSessionBasedRecommendations = async (
         let finalRecommendations: any[] = [];
         const allExcludeIds = [...recentSongs.map(s => s._id), ...excludeIds.map(id => new mongoose.Types.ObjectId(id))];
         
-        // --- LOGIC GỢI Ý LINH HOẠT THEO TỶ LỆ MONG MUỐN ---
-
-        // 2. Bước A (Khai thác): Lấy TỐI ĐA 5 bài của nghệ sĩ nổi bật
+        // 2. Bước A (Khai thác): Lấy TỐI ĐA 5 bài của nghệ sĩ nổi bật (vẫn sắp xếp theo lượt thích để đảm bảo chất lượng)
         const exploitationLimit = 5;
         if (topArtistId) {
             const artistSongs = await Song.find({
@@ -93,30 +89,30 @@ export const getSessionBasedRecommendations = async (
         }
 
         if (secondTopGenreId) {
-            // --- NÂNG CẤP: Dùng $sample để lấy ngẫu nhiên ---
             diverseSongs = await Song.aggregate([
                 { $match: { 
                     _id: { $nin: currentExcludeIds },
                     genre: new mongoose.Types.ObjectId(secondTopGenreId)
                 }},
-                { $sample: { size: diverseLimit } } // Lấy N tài liệu ngẫu nhiên
+                { $sample: { size: diverseLimit } }
             ]);
-            // Populate thủ công sau khi aggregate
             await Song.populate(diverseSongs, [{ path: 'artist' }, { path: 'genre' }]);
-            // ---------------------------------------------
         }
         
         currentExcludeIds.push(...diverseSongs.map(s => s._id));
         
-        // 4. Bước B (Khám phá mềm): Dùng các suất còn lại để lấp đầy bằng các bài cùng thể loại
+        // 4. Bước B (Khám phá mềm): Lấy các bài còn lại từ thể loại chính, cũng LẤY NGẪU NHIÊN
         const remainingLimit = recommendationLimit - finalRecommendations.length - diverseSongs.length;
         if (topGenreId && remainingLimit > 0) {
-            const genreSongs = await Song.find({
-                _id: { $nin: currentExcludeIds },
-                genre: new mongoose.Types.ObjectId(topGenreId),
-                artist: { $ne: topArtistId ? new mongoose.Types.ObjectId(topArtistId) : null }
-            })
-            .sort({ like: -1 }).limit(remainingLimit).populate('artist').populate('genre');
+            const genreSongs = await Song.aggregate([
+                 { $match: { 
+                    _id: { $nin: currentExcludeIds },
+                    genre: new mongoose.Types.ObjectId(topGenreId),
+                    artist: { $ne: topArtistId ? new mongoose.Types.ObjectId(topArtistId) : null }
+                }},
+                { $sample: { size: remainingLimit } }
+            ]);
+            await Song.populate(genreSongs, [{ path: 'artist' }, { path: 'genre' }]);
             finalRecommendations.push(...genreSongs);
         }
 
@@ -124,7 +120,7 @@ export const getSessionBasedRecommendations = async (
         finalRecommendations.push(...diverseSongs);
         finalRecommendations = shuffleArray(finalRecommendations);
 
-        console.log(`Đã tìm thấy ${finalRecommendations.length} gợi ý tinh chỉnh.`);
+        console.log(`Đã tìm thấy ${finalRecommendations.length} gợi ý (Khai thác: ${exploitationLimit}, Khám phá: ${diverseSongs.length + (finalRecommendations.length - exploitationLimit - diverseSongs.length)}).`);
         return finalRecommendations;
 
     } catch (error) {
