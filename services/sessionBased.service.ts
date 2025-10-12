@@ -77,7 +77,7 @@ export const getSessionBasedRecommendations = async (
 
         let currentExcludeIds = [...allExcludeIds, ...finalRecommendations.map(s => s._id)];
 
-        // 3. Bước C (Khám phá mạnh): Cố gắng lấy 2 BÀI khác thể loại
+        // 3. Bước C (Khám phá mạnh): Cố gắng lấy 2 BÀI NGẪU NHIÊN khác thể loại
         const diverseLimit = 2;
         let diverseSongs: any[] = [];
         if (!secondTopGenreId) { // Tìm thể loại ngẫu nhiên nếu cần
@@ -93,10 +93,17 @@ export const getSessionBasedRecommendations = async (
         }
 
         if (secondTopGenreId) {
-            diverseSongs = await Song.find({
-                _id: { $nin: currentExcludeIds },
-                genre: new mongoose.Types.ObjectId(secondTopGenreId)
-            }).sort({ like: -1 }).limit(diverseLimit).populate('artist').populate('genre');
+            // --- NÂNG CẤP: Dùng $sample để lấy ngẫu nhiên ---
+            diverseSongs = await Song.aggregate([
+                { $match: { 
+                    _id: { $nin: currentExcludeIds },
+                    genre: new mongoose.Types.ObjectId(secondTopGenreId)
+                }},
+                { $sample: { size: diverseLimit } } // Lấy N tài liệu ngẫu nhiên
+            ]);
+            // Populate thủ công sau khi aggregate
+            await Song.populate(diverseSongs, [{ path: 'artist' }, { path: 'genre' }]);
+            // ---------------------------------------------
         }
         
         currentExcludeIds.push(...diverseSongs.map(s => s._id));
