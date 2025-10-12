@@ -30,7 +30,7 @@ export const getSessionBasedRecommendations = async (
             .limit(historyLimit)
             .populate({
                 path: 'songId', model: 'Song',
-                populate: [{ path: 'artist', model: 'Artist' }, { path: 'genre', model: 'Category' }]
+                populate: [{ path: 'artist', model: 'Artist' }, { path: 'genre', model: 'Topic' }]
             });
 
         if (recentHistory.length < 2) return [];
