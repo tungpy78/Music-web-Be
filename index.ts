@@ -21,6 +21,10 @@ app.use(express.json());
 adminRoutes(app);
 clientRoutes(app);
 
+app.get("/health", (_req, res) => {
+  res.status(200).json({ ok: true });
+});
+
 
 // Middleware xử lý lỗi tập trung trong ứng dụng Back-end NodeJS (ExpressJS)
 app.use(errorHandlingMiddleware);

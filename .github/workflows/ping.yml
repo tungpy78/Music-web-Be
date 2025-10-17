@@ -1,0 +1,13 @@
+name: Keep Backend Warm
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # ping mỗi 10 phút
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render backend
+        run: |
+          curl -s -o /dev/null -w "%{http_code}\n" https://music-web-be-ryw9.onrender.com/health
