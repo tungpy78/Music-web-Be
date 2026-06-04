@@ -3,6 +3,15 @@ import { AritistRequest } from "../Request/ArtistRequest";
 import { ArtistService } from "../services/ArtistService";
 import { StatusCodes } from "http-status-codes";
 
+
+const getPopularArtists = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await ArtistService.getPopularArtistsService();
+        res.status(StatusCodes.OK).json(result);
+    } catch (e) {
+        next(e);
+    }
+};
 const create = async(req: Request, res: Response, next: NextFunction) => {
     try{
         const {name,bio } = req.body
@@ -69,6 +78,7 @@ const getArtistById = async (req: Request, res: Response, next: NextFunction) =>
 }
 
 export const ArtistController = {
+    getPopularArtists,
     create,
     getAllArtist,
     updateArtist,

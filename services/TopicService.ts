@@ -18,6 +18,27 @@ const getTopicsService = async () => {
     return topics;
 }
 
+const getPopularTopicsService = async () => {
+  const topics = await Topic.aggregate([
+    { $match: { deleted: false } },
+    {
+      $lookup: {
+        from: 'Songs',
+        localField: "_id",
+        foreignField: "genre",
+        as: 'songs'
+      },
+    },
+    // Tổng like mà không cần unwind/group
+    { $addFields: { totalLikes: { $sum: '$songs.like' } } },
+    { $project: { title: 1, totalLikes: 1, avatar: 1 } },
+    { $sort: { totalLikes: -1 } },
+    { $limit: 6 },
+  ]);
+  return topics;
+};
+
+
 const getTopicsForAdmin = async () => {  
     const topics = await Topic.find();
     if (!topics || topics.length === 0) {
@@ -154,6 +175,7 @@ const restoretopic = async(topicId: string) => {
 
 export const TopicService = {
     getTopicsService,
+    getPopularTopicsService,
     getTopicByIdService,
     create,
     updateTopic,

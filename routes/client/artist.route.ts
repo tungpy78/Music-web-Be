@@ -10,6 +10,8 @@ import { AuthMiddleware } from "../../middlewares/authMiddleware";
 
 const router: Router = Router();
 
+router.get('/popular', ArtistController.getPopularArtists);
 router.get('/:artistId',ArtistValidator.getArtistByIdValidator,AuthMiddleware.validateRequest, ArtistController.getArtistById);
+
 
 export const ArtistRouter: Router = router;

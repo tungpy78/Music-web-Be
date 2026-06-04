@@ -9,6 +9,7 @@ const router: Router = Router();
 
 
 router.get('/', TopicController.getTopics);
+router.get('/popular', TopicController.getPopularTopics);
 router.get('/:topicId',topicValidators.getTopicById ,TopicController.getTopicById);
 
 

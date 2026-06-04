@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 //   });
 dotenv.config();
 
-const redis = new Redis(process.env.REDIS_URL || "rediss://default:AfrbAAIncDE3ZjFkZjVhMjQ5YjA0ZGRlODc0OTE1MjE5M2IwZTA2ZHAxNjQyMTk@touching-tarpon-64219.upstash.io:6379");
+const redis = new Redis(process.env.REDIS_URL || "rediss://default:AeMxAAIncDExMjUwOTIwNzUyYzQ0NGI1OTYyMWE1YzBlOWE5NDA1MXAxNTgxNjE@romantic-pheasant-58161.upstash.io:6379");
 
 const saveOTP = async (email: string, otp: string, expireSeconds = 300) => {
   await redis.set(`otp:${email}`, otp, 'EX', expireSeconds);

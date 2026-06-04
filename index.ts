@@ -3,7 +3,6 @@ import * as database from './config/database';
 import dotenv from 'dotenv';
 import clientRoutes from './routes/client';
 import cors from 'cors';
-import { error } from 'console';
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware';
 import adminRoutes from './routes/admin';
 

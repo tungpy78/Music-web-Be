@@ -1,10 +1,18 @@
-import { body, param } from "express-validator"
+import { body, param, query } from "express-validator"
 const getTopicById = [
-    param("topicId")
-    .isMongoId()
-    .withMessage("Topic ID không hợp lệ")
-    .notEmpty()
-    .withMessage("Topic ID không được để trống"),
+  param("topicId")
+  .isMongoId()
+  .withMessage("Topic ID không hợp lệ")
+  .notEmpty()
+  .withMessage("Topic ID không được để trống"),
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page phải là số nguyên lớn hơn hoặc bằng 1"),
+  query("limit")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Limit phải là số nguyên lớn hơn hoặc bằng 1"),
 ]
 
 const createTopic = [

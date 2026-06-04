@@ -7,6 +7,25 @@ import Cloudinary from "../Utils/Cloudinary";
 import { HistoryActionService } from "./HistoryActionService";
 import { StatusCodes } from "http-status-codes"
 
+const getPopularArtistsService = async () => {
+    const artistsPopular = await Artist.aggregate([
+        {
+            $lookup: {
+                from: 'Songs',
+                localField: "_id",
+                foreignField: "artist",
+                as: 'songs'
+            },
+        },
+        // Tổng like mà không cần unwind/group
+        { $addFields: { totalLikes: { $sum: '$songs.like' } } },
+        { $project: { name: 1, totalLikes: 1, imageUrl: 1 } },
+        { $sort: { totalLikes: -1 } },
+        { $limit: 6 }
+    ]);
+    return artistsPopular;
+};
+
 const create = async (userId: string,aritistRequest: AritistRequest) => {
     try{
         const avatarUrl = await Cloudinary.uploadToCloudinary(aritistRequest.fileAvata, {
@@ -90,6 +109,7 @@ const getArtistByIdService = async (artistId: string) => {
 };
 
 export const ArtistService = {
+    getPopularArtistsService,
     create,
     getAllArtist,
     updateArtist,

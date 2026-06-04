@@ -15,11 +15,22 @@ const getTopics = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
+const getPopularTopics = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await TopicService.getPopularTopicsService();
+        res.status(StatusCodes.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 const getTopicById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 20; // Mỗi lần tải 20 bài
         const { topicId } = req.params;
+        
         const result = await TopicService.getTopicByIdService(topicId, page, limit);
         
         res.status(StatusCodes.OK).json(result);
@@ -102,6 +113,7 @@ const getTopicsForAdmin = async (req:Request, res: Response, next:NextFunction) 
 
 export const TopicController = {
     getTopics,
+    getPopularTopics,
     getTopicById,
     create,
     updateTopic,
